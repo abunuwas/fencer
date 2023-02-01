@@ -4,11 +4,10 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import requests
-
+from colorama import init as colorama_init, Fore
+from jsf import JSF
 
 # create an openapi parser package
-from colorama import init, Fore
-from hypothesis_jsonschema import from_schema
 
 base_url = 'http://localhost:5000'
 
@@ -36,15 +35,21 @@ class Endpoint:
         )
 
     @property
+    def query_params(self):
+        return [
+            param for param in self.parameters if param['in'] == 'query'
+        ]
+
+    @property
     def required_query_params(self):
         return [
-            param for param in self.parameters if param['in'] == 'query' and param['required']
+            param for param in self.query_params if param['required']
         ]
 
     @property
     def optional_query_params(self):
         return [
-            param for param in self.parameters if param['in'] == 'query' and not param['required']
+            param for param in self.parameters if not param['required']
         ]
 
     @property
@@ -52,6 +57,15 @@ class Endpoint:
         return [
             param for param in self.parameters if param['in'] == 'path'
         ]
+
+    def has_query_params(self):
+        return len(self.query_params) > 0
+
+    def has_required_query_params(self):
+        return len(self.required_query_params) > 0
+
+    def has_optional_query_params(self):
+        return len(self.optional_query_params) > 0
 
     @property
     def safe_url_path_without_query_params(self):
@@ -65,7 +79,7 @@ class Endpoint:
         # safe requests
         return (
                 self.safe_url_path_without_query_params + '?'
-                + '&'.join(f"{param['name']}={from_schema(param['schema']).example()}"
+                + '&'.join(f"{param['name']}={JSF(param['schema']).generate()}"
                            for param in self.required_query_params)
         )
 
@@ -78,14 +92,25 @@ class Endpoint:
 
     @property
     def safe_url_path_with_safe_optional_query_params(self):
+        if self.has_required_query_params():
+            return (
+                self.safe_url_path_with_safe_required_query_params + '?'
+                + '&'.join(f"{param['name']}={JSF(param['schema']).generate()}"
+                           for param in self.optional_query_params)
+            )
         return (
                 self.safe_url_path_without_query_params + '?'
-                + '&'.join(f"{param['name']}={from_schema(param['schema']).example()}"
+                + '&'.join(f"{param['name']}={JSF(param['schema']).generate()}"
                            for param in self.optional_query_params)
         )
 
     @property
     def safe_url_path_with_unsafe_optional_query_params(self):
+        if self.has_required_query_params():
+            return (
+                    self.safe_url_path_with_safe_required_query_params + '?'
+                    + '&'.join(f"{param['name']}={dangerous_sql}" for param in self.optional_query_params)
+            )
         return (
                 self.safe_url_path_without_query_params + '?'
                 + '&'.join(f"{param['name']}={dangerous_sql}" for param in self.optional_query_params)
@@ -99,7 +124,7 @@ class Endpoint:
     def unsafe_url_path_with_safe_required_query_params(self):
         return (
                 self.unsafe_url_path_without_query_params + '?'
-                + '&'.join(f"{param['name']}={from_schema(param['schema']).example()}"
+                + '&'.join(f"{param['name']}={JSF(param['schema']).generate()}"
                            for param in self.required_query_params)
         )
 
@@ -112,14 +137,25 @@ class Endpoint:
 
     @property
     def unsafe_url_path_with_safe_optional_query_params(self):
+        if self.has_required_query_params():
+            return (
+                    self.unsafe_url_path_with_safe_required_query_params + '?'
+                    + '&'.join(f"{param['name']}={JSF(param['schema']).generate()}"
+                               for param in self.optional_query_params)
+            )
         return (
                 self.unsafe_url_path_without_query_params + '?'
-                + '&'.join(f"{param['name']}={from_schema(param['schema']).example()}"
+                + '&'.join(f"{param['name']}={JSF(param['schema']).generate()}"
                            for param in self.optional_query_params)
         )
 
     @property
     def unsafe_url_path_with_unsafe_optional_query_params(self):
+        if self.has_required_query_params():
+            return (
+                    self.unsafe_url_path_with_safe_required_query_params + '?'
+                    + '&'.join(f"{param['name']}={dangerous_sql}" for param in self.optional_query_params)
+            )
         return (
                 self.unsafe_url_path_without_query_params + '?'
                 + '&'.join(f"{param['name']}={dangerous_sql}" for param in self.optional_query_params)
@@ -127,31 +163,50 @@ class Endpoint:
 
     @property
     def urls(self):
-        return [
+        urls = [
             self.safe_url_path_without_query_params,
-            self.safe_url_path_with_safe_required_query_params,
-            self.safe_url_path_with_unsafe_required_query_params,
-            self.safe_url_path_with_safe_optional_query_params,
-            self.safe_url_path_with_unsafe_optional_query_params,
-            self.unsafe_url_path_without_query_params,
-            self.unsafe_url_path_with_safe_required_query_params,
-            self.unsafe_url_path_with_unsafe_required_query_params,
-            self.unsafe_url_path_with_safe_optional_query_params,
-            self.unsafe_url_path_with_unsafe_optional_query_params,
         ]
+        if self.has_required_query_params():
+            urls.extend([
+                self.safe_url_path_with_safe_required_query_params,
+                self.safe_url_path_with_unsafe_required_query_params,
+            ])
+        if self.has_optional_query_params():
+            urls.extend([
+                self.safe_url_path_with_safe_optional_query_params,
+                self.safe_url_path_with_unsafe_optional_query_params,
+            ])
+        if self.path.has_path_params():
+            urls.extend([
+                self.unsafe_url_path_without_query_params,
+            ])
+            if self.has_required_query_params():
+                urls.extend([
+                    self.unsafe_url_path_with_safe_required_query_params,
+                    self.unsafe_url_path_with_unsafe_required_query_params,
+                ])
+            if self.has_optional_query_params():
+                urls.extend([
+                    self.unsafe_url_path_with_safe_optional_query_params,
+                    self.unsafe_url_path_with_unsafe_optional_query_params,
+                ])
+        return urls
 
     def get_urls(self):
         for url in self.urls:
             yield url
 
-    def with_required_query_params(self):
-        pass
+    def has_request_payload(self):
+        if self.body is None:
+            return False
+        return self.body.get('content', {}).get('application/json', {}).get('schema') is not None
 
-    def without_required_query_params(self):
-        pass
+    def generate_safe_request_payload(self):
+        schema = self.body['content']['application/json']['schema']
+        return JSF(schema).generate()
 
-    def with_optional_query_params(self):
-        pass
+    def generate_unsafe_request_payload(self):
+        return
 
 
 @dataclass
@@ -181,7 +236,7 @@ class APIPath:
         for param in self.path_params_schemas:
             path = path.replace(
                 f'{{{param["name"]}}}',
-                from_schema(param['schema']).example(),
+                JSF(param['schema']).generate(),
             )
 
         if not self.has_undocumented_path_params():
@@ -190,7 +245,7 @@ class APIPath:
         for param in self._undocumented_path_params:
             path = path.replace(
                 f'{{{param["name"]}}}',
-                from_schema({'type': 'string'}).example(),
+                JSF({'type': 'string'}).generate(),
             )
 
         return path
@@ -225,27 +280,68 @@ class APISpec:
                         api_path=path,
                         method=method,
                         parameters=url_params + self.paths[path][method].get('parameters', []),
-                        body=self.paths[path][method].get('requestBody'),
+                        body=self.resolve_body(self.paths[path][method].get('requestBody')),
                         responses=self.paths[path][method]['responses']
                     )
                 )
+
+    def resolve_body(self, body: dict | None):
+        if body is None:
+            return
+
+        if body.get('content') is None:
+            return
+
+        # we only support application/json atm
+        if body['content'].get('application/json') is None:
+            return
+
+        if '$ref' in body['content']['application/json']['schema']:
+            schema = self.resolve_schema(body['content']['application/json']['schema']['$ref'])
+            body['content']['application/json']['schema'] = schema
+
+        return body
+
+    def resolve_schema(self, schema_ref):
+        schema_name = schema_ref.split('/')[-1]
+        schema = self.spec['components']['schemas'][schema_name]
+
+        if 'allOf' in schema:
+            raise Exception('allOf not implemented')
+
+        if 'anyOf' in schema:
+            raise Exception('anyOf not implemented')
+
+        for name, description in schema['properties'].items():
+            if '$ref' in description:
+                property_schema = self.resolve_schema(description['$ref'])
+                schema['properties'][name] = property_schema
+                continue
+
+            if description['type'] == 'array' and '$ref' in description['items']:
+                items_schema = self.resolve_schema(description['items']['$ref'])
+                description['items'] = items_schema
+
+        return schema
 
 
 api_spec = APISpec(base_url=base_url, spec=spec)
 api_spec.load_endpoints()
 
-# for endpoint in api_spec.endpoints:
-#     print(endpoint.url)
-
-init(autoreset=True)
+colorama_init(autoreset=True)
 
 counter = 0
 
+# breakpoint()
 for endpoint in api_spec.endpoints:
     for url in endpoint.get_urls():
         counter += 1
-        print(endpoint.method.upper(), url)
+        print(Fore.GREEN + endpoint.method.upper(), Fore.GREEN + url)
         callable_ = getattr(requests, endpoint.method)
+        if endpoint.has_request_payload():
+            payload = endpoint.generate_safe_request_payload()
+            print(Fore.BLUE + json.dumps(payload))
+            response = callable_(url, json=payload)
         response = callable_(url)
         print(response.status_code)
         try:
