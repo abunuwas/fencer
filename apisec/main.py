@@ -205,8 +205,31 @@ class Endpoint:
         schema = self.body['content']['application/json']['schema']
         return JSF(schema).generate()
 
+    def _inject_dangerous_sql_in_payload(self, payload, schema):
+        # need to include anyOf, allOf
+        if schema['type'] == 'array':
+            return [
+                self._inject_dangerous_sql_in_payload(item, schema['items'])
+                for item in payload
+            ]
+        if schema['type'] == 'object':
+            # sometimes properties aren't specified so soft access
+            for name, description in schema.get('properties', {}).items():
+                # property may not be required
+                if name not in payload:
+                    continue
+                if description['type'] == 'string':
+                    payload[name] = dangerous_sql
+                if description['type'] == 'array':
+                    payload[name] = self._inject_dangerous_sql_in_payload(
+                        payload[name], description
+                    )
+        return payload
+
     def generate_unsafe_request_payload(self):
-        return
+        schema = self.body['content']['application/json']['schema']
+        payload = JSF(schema).generate()
+        return self._inject_dangerous_sql_in_payload(payload, schema)
 
 
 @dataclass
@@ -334,8 +357,12 @@ counter = 0
 
 
 def call_endpoint(url, payload=None):
+    if payload:
+        print(Fore.BLUE + json.dumps(payload))
+
     callable_ = getattr(requests, endpoint.method)
     response = callable_(url, json=payload)
+
     print(response.status_code)
     try:
         content = response.json()
