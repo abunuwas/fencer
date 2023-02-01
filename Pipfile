@@ -6,8 +6,8 @@ name = "pypi"
 [packages]
 aiohttp = "*"
 requests = "*"
-hypothesis-jsonschema = "*"
 colorama = "*"
+jsf = "*"
 
 [dev-packages]
 black = "*"
