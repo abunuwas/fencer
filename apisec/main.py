@@ -332,27 +332,32 @@ colorama_init(autoreset=True)
 
 counter = 0
 
-# breakpoint()
+
+def call_endpoint(url, payload=None):
+    callable_ = getattr(requests, endpoint.method)
+    response = callable_(url, json=payload)
+    print(response.status_code)
+    try:
+        content = response.json()
+    except:
+        content = response.content
+    content = str(content)
+    if response.status_code == 500:
+        print(Fore.RED + content)
+    else:
+        print(content)
+
+
 for endpoint in api_spec.endpoints:
     for url in endpoint.get_urls():
         counter += 1
         print(Fore.GREEN + endpoint.method.upper(), Fore.GREEN + url)
-        callable_ = getattr(requests, endpoint.method)
+        call_endpoint(url)
         if endpoint.has_request_payload():
-            payload = endpoint.generate_safe_request_payload()
-            print(Fore.BLUE + json.dumps(payload))
-            response = callable_(url, json=payload)
-        response = callable_(url)
-        print(response.status_code)
-        try:
-            content = response.json()
-        except:
-            content = response.content
-        content = str(content)
-        if response.status_code == 500:
-            print(Fore.RED + content)
-        else:
-            print(content)
+            counter += 1
+            call_endpoint(url, endpoint.generate_safe_request_payload())
+            counter += 1
+            call_endpoint(url, endpoint.generate_unsafe_request_payload())
 
 
 print(Fore.YELLOW + f'Total tests: {counter}')
