@@ -9,11 +9,6 @@ from jsf import JSF
 
 # create an openapi parser package
 
-base_url = 'http://localhost:5000'
-
-spec_file = Path(__file__).parent / 'openapi.json'
-spec = json.loads(spec_file.read_text())
-
 dangerous_sql = "1' OR 1=1 --"
 
 standard_http_methods = ['get', 'post', 'put', 'patch', 'delete', 'options', 'head']
@@ -348,15 +343,7 @@ class APISpec:
         return schema
 
 
-api_spec = APISpec(base_url=base_url, spec=spec)
-api_spec.load_endpoints()
-
-colorama_init(autoreset=True)
-
-counter = 0
-
-
-def call_endpoint(url, payload=None):
+def call_endpoint(url, endpoint, payload=None):
     if payload:
         print(Fore.BLUE + json.dumps(payload))
 
@@ -373,18 +360,3 @@ def call_endpoint(url, payload=None):
         print(Fore.RED + content)
     else:
         print(content)
-
-
-for endpoint in api_spec.endpoints:
-    for url in endpoint.get_urls():
-        counter += 1
-        print(Fore.GREEN + endpoint.method.upper(), Fore.GREEN + url)
-        call_endpoint(url)
-        if endpoint.has_request_payload():
-            counter += 1
-            call_endpoint(url, endpoint.generate_safe_request_payload())
-            counter += 1
-            call_endpoint(url, endpoint.generate_unsafe_request_payload())
-
-
-print(Fore.YELLOW + f'Total tests: {counter}')
