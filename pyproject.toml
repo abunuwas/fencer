@@ -1,0 +1,72 @@
+[build-system]
+requires = ["hatchling>=1.8.0", "hatch-vcs", "hatch-fancy-pypi-readme"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+path = 'apisec/__init__.py'
+
+[project]
+name = "fencer"
+description = "Automated API security testing."
+license = "MIT"
+requires-python = ">=3.7"
+authors = [
+  { name = "José Haro Peralta", email = "jose@microapis.io" },
+]
+
+classifiers = [
+  "Development Status :: 2 - Pre-Alpha",
+  "Environment :: Console",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.7",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+  "Topic :: Software Development :: Quality Assurance",
+]
+dependencies = [
+  "click>=8.0.0",
+  "requests>=2.28.2",
+  "colorama>=0.4.6",
+  "jsf>=0.7.1"
+]
+dynamic = ["version"]
+
+[project.scripts]
+fencer = "apisec.cli:cli"
+
+[project.urls]
+Homepage = "https://github.com/abunuwas/fencer"
+Source = "https://github.com/abunuwas/fencer"
+Documentation = "https://fencer.microapis.io"
+Changelog = "https://github.com/abunuwas/fencer/blob/main/CHANGES.md"
+"Bug Tracker" = "https://github.com/abunuwas/fencer/issues"
+
+[tool.hatch.build.targets.wheel]
+only-include = ["apisec"]
+
+[tool.black]
+color = true
+line-length = 120
+target-version = ['py310']
+skip-string-normalization = true
+
+[tool.isort]
+line_length = 120
+skip_gitignore = true
+known_first_party = "fencer"
+include_trailing_comma = true
+
+[tool.pytest.ini_options]
+testpaths = 'tests'
+xfail_strict = true
+filterwarnings = [
+    'error',
+    'ignore:path is deprecated.*:DeprecationWarning:',
+]
