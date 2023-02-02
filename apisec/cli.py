@@ -4,16 +4,17 @@ from pathlib import Path
 import click
 from colorama import init as colorama_init, Fore
 
-from main import APISpec, call_endpoint
+from . import __version__
+from .main import APISpec, call_endpoint
 
 
 @click.group()
-def run_test_group():
-    """Run the security test suite"""
+@click.version_option(__version__)
+def cli():
     pass
 
 
-@run_test_group.command()
+@cli.command()
 @click.option('--oas-file', type=click.Path(exists=True))
 @click.option('--base-url', type=click.STRING)
 def run(oas_file, base_url):
@@ -38,9 +39,6 @@ def run(oas_file, base_url):
                 call_endpoint(url, endpoint, endpoint.generate_unsafe_request_payload())
 
     print(Fore.YELLOW + f'Total tests: {counter}')
-
-
-cli = click.CommandCollection(sources=[run_test_group])
 
 
 if __name__ == "__main__":

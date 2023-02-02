@@ -1,10 +1,9 @@
 import json
 import re
 from dataclasses import dataclass
-from pathlib import Path
 
 import requests
-from colorama import init as colorama_init, Fore
+from colorama import Fore
 from jsf import JSF
 
 # create an openapi parser package
