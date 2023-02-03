@@ -6,8 +6,6 @@ import requests
 from colorama import Fore
 from jsf import JSF
 
-# create an openapi parser package
-
 dangerous_sql = "1' OR 1=1 --"
 
 standard_http_methods = ['get', 'post', 'put', 'patch', 'delete', 'options', 'head']
@@ -282,7 +280,7 @@ class APISpec:
         self.servers = spec.get('servers')
         self.paths = spec['paths']
         self.components = spec['components']
-        self.endpoints = []
+        self.endpoints: list[Endpoint] = []
 
     def load_endpoints(self):
         paths = self.paths.keys()

@@ -3,11 +3,11 @@
 [![pypi](https://img.shields.io/pypi/v/fencer.svg)](https://pypi.python.org/pypi/fencer)
 [![versions](https://img.shields.io/pypi/pyversions/fencer.svg)](https://github.com/abunuwas/fencer)
 
-Automated API security testing framework. 
+Automated API security testing tool. 
 
 **DO NOT run this against production!!**
 
-Fencer is an automated API security testing framework. It's an experimental project to see how much of the API
+Fencer is an automated API security testing tool. It's an experimental project to see how much of the API
 security testing process can be automated. I believe that API security testing requires a holistic approach. 
 An API is part of a bigger system, and the security configuration of the whole system affects the security of 
 the API. However, it's also true that many security tests on APIs are easy to formalize and hence automate. The 
