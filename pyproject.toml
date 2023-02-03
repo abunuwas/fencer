@@ -3,11 +3,12 @@ requires = ["hatchling>=1.8.0", "hatch-vcs", "hatch-fancy-pypi-readme"]
 build-backend = "hatchling.build"
 
 [tool.hatch.version]
-path = 'apisec/__init__.py'
+path = 'fencer/__init__.py'
 
 [project]
 name = "fencer"
 description = "Automated API security testing."
+readme = "README.md"
 license = "MIT"
 requires-python = ">=3.7"
 authors = [
@@ -39,17 +40,17 @@ dependencies = [
 dynamic = ["version"]
 
 [project.scripts]
-fencer = "apisec.cli:cli"
+fencer = "fencer.cli:cli"
 
 [project.urls]
 Homepage = "https://github.com/abunuwas/fencer"
 Source = "https://github.com/abunuwas/fencer"
-Documentation = "https://fencer.microapis.io"
+#Documentation = "https://fencer.microapis.io"
 Changelog = "https://github.com/abunuwas/fencer/blob/main/CHANGES.md"
 "Bug Tracker" = "https://github.com/abunuwas/fencer/issues"
 
 [tool.hatch.build.targets.wheel]
-only-include = ["apisec"]
+only-include = ["fencer"]
 
 [tool.black]
 color = true
