@@ -56,6 +56,9 @@ class Endpoint:
     def has_optional_query_params(self):
         return len(self.optional_query_params) > 0
 
+    def has_path_params(self):
+        return len(self.path_params) > 0
+
     @property
     def safe_url_path_without_query_params(self):
         return self.base_url + self.path.build_safe_path()

@@ -40,7 +40,7 @@ def run(oas_file, base_url):
 
     click.echo()
 
-    click.echo(click.style("SUMMARY", fg="green"))
+    click.echo(click.style("  SUMMARY", fg="green"))
 
     click.echo()
     click.echo(click.style("> Number of tests", fg="yellow"))

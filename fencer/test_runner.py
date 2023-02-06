@@ -189,6 +189,8 @@ class TestRunner:
     def run_sql_injection_through_path_parameters(self):
         failing_tests = []
         for endpoint in self.api_spec.endpoints:
+            if not endpoint.has_path_params():
+                continue
             endpoint_failing_tests = []
             click.echo(f"    {endpoint.method.upper()} {endpoint.base_url + endpoint.path.path}", nl=False)
             for url in endpoint.get_urls_with_unsafe_path_params():
