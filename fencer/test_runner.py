@@ -10,7 +10,7 @@ import requests
 
 from .main import APISpec
 
-test_case = {
+test_case_example = {
     "id": "asdf",
     "timestamp": "2023-02-01:09:00:00TZ:GMT",
     "category": "injection_attack",
@@ -105,9 +105,14 @@ class TestCase:
         }
 
 
+@dataclass
 class TestReporter:
-    def __init__(self):
-        pass
+    category: AttackStrategy
+    number_tests: int
+    failing_tests: int
+    low_severity: int = 0
+    medium_severity: int = 0
+    high_severity: int = 0
 
 
 class InjectionTestCaseRunner:
@@ -151,6 +156,7 @@ class TestRunner:
     def __init__(self, api_spec: APISpec):
         self.api_spec = api_spec
         self.injection_tests = 0
+        self.reports = []
 
     def run_sql_injection_through_query_parameters(self):
         failing_tests = []
@@ -175,9 +181,9 @@ class TestRunner:
                     endpoint_failing_tests.append(test_case.test_case)
             if len(endpoint_failing_tests) > 0:
                 failing_tests.extend(endpoint_failing_tests)
-                click.echo("🚨")
+                click.echo(" 🚨")
             else:
-                click.echo("✅")
+                click.echo(" ✅")
         return failing_tests
 
     def run_sql_injection_through_path_parameters(self):
@@ -203,9 +209,9 @@ class TestRunner:
                     endpoint_failing_tests.append(test_case.test_case)
             if len(endpoint_failing_tests) > 0:
                 failing_tests.extend(endpoint_failing_tests)
-                click.echo("🚨")
+                click.echo(" 🚨")
             else:
-                click.echo("✅")
+                click.echo(" ✅")
         return failing_tests
 
     def run_sql_injection_through_request_payloads(self):
@@ -229,9 +235,9 @@ class TestRunner:
             test_case.run()
             if test_case.test_case.result == TestResult.FAIL:
                 failing_tests.append(test_case.test_case)
-                click.echo("🚨")
+                click.echo(" 🚨")
             else:
-                click.echo("✅")
+                click.echo(" ✅")
         return failing_tests
 
     def run_sql_injection_attacks(self):
@@ -257,6 +263,15 @@ class TestRunner:
         failing_payload_tests = self.run_sql_injection_through_request_payloads()
 
         failing_tests += failing_query_params_tests + failing_path_params_tests + failing_payload_tests
+
+        self.reports.append(TestReporter(
+            category=AttackStrategy.INJECTION,
+            number_tests=self.injection_tests,
+            failing_tests=len(failing_tests),
+            low_severity=sum(1 for test in failing_tests if test.severity == VulnerabilitySeverityLevel.LOW),
+            medium_severity=sum(1 for test in failing_tests if test.severity == VulnerabilitySeverityLevel.MEDIUM),
+            high_severity=sum(1 for test in failing_tests if test.severity == VulnerabilitySeverityLevel.HIGH),
+        ))
 
         failed_tests_file = Path('.fencer/injection_attacks.json')
         failed_tests_file.write_text(
