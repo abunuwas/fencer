@@ -54,7 +54,15 @@ For example:
 $ fencer run --oas-file openapi.json --base-url http://localhost:5000
 ```
 
+![image info](img/fencer_demo.gif)
+
 ## Contributing
 
-I'm just getting started with this project and I could use some help. I'll be uploading a contribution guideline
+Clone the repository and install it locally by running:
+
+```bash
+$ pipenv install -e .
+```
+
+I'm just getting started with this project, and I could use some help! I'll be uploading a contribution guideline
 in the coming days, but if you have suggestions in the meantime, please raise an issue and let's have a chat!
