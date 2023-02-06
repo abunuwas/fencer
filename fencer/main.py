@@ -1,9 +1,6 @@
-import json
 import re
 from dataclasses import dataclass
 
-import requests
-from colorama import Fore
 from jsf import JSF
 
 dangerous_sql = "1' OR 1=1 --"
@@ -325,22 +322,3 @@ class APISpec:
                 description['items'] = items_schema
 
         return schema
-
-
-def call_endpoint(url, endpoint, payload=None):
-    if payload:
-        print(Fore.BLUE + json.dumps(payload))
-
-    callable_ = getattr(requests, endpoint.method)
-    response = callable_(url, json=payload)
-
-    print(response.status_code)
-    try:
-        content = response.json()
-    except:
-        content = response.content
-    content = str(content)
-    if response.status_code == 500:
-        print(Fore.RED + content)
-    else:
-        print(content)
