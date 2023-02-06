@@ -6,9 +6,9 @@ name = "pypi"
 [packages]
 aiohttp = "*"
 requests = "*"
-colorama = "*"
 jsf = "*"
 click = "*"
+tabulate = "*"
 
 [dev-packages]
 black = "*"
