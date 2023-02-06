@@ -5,6 +5,7 @@ from enum import Enum
 from pathlib import Path
 from typing import Any
 
+import click
 import requests
 
 from .main import APISpec
@@ -151,11 +152,12 @@ class TestRunner:
         self.api_spec = api_spec
         self.injection_tests = 0
 
-    def run_sql_injection_attacks(self):
-        failing_tests: list[TestCase] = []
-
+    def run_sql_injection_through_query_parameters(self):
+        failing_tests = []
         for endpoint in self.api_spec.endpoints:
-            for url in endpoint.get_urls():
+            endpoint_failing_tests = []
+            click.echo(f"    {endpoint.method.upper()} {endpoint.base_url + endpoint.path.path}", nl=False)
+            for url in endpoint.get_urls_with_unsafe_query_params():
                 self.injection_tests += 1
                 test_case = InjectionTestCaseRunner(
                     test_case=TestCase(
@@ -164,43 +166,98 @@ class TestRunner:
                         description=TestDescription(
                             http_method=getattr(HTTPMethods, endpoint.method.upper()),
                             url=url, base_url=endpoint.base_url, path=endpoint.path.path,
+                            payload=endpoint.generate_safe_request_payload() if endpoint.has_request_payload() else None,
                         )
                     )
                 )
                 test_case.run()
                 if test_case.test_case.result == TestResult.FAIL:
-                    failing_tests.append(test_case.test_case)
-                if endpoint.has_request_payload():
-                    self.injection_tests += 1
-                    test_case = InjectionTestCaseRunner(
-                        test_case=TestCase(
-                            category=AttackStrategy.INJECTION,
-                            test_target="sql_injection__optional_query_parameters",
-                            description=TestDescription(
-                                http_method=getattr(HTTPMethods, endpoint.method.upper()),
-                                url=url, base_url=endpoint.base_url, path=endpoint.path.path,
-                                payload=endpoint.generate_safe_request_payload()
-                            )
+                    endpoint_failing_tests.append(test_case.test_case)
+            if len(endpoint_failing_tests) > 0:
+                failing_tests.extend(endpoint_failing_tests)
+                click.echo("🚨")
+            else:
+                click.echo("✅")
+        return failing_tests
+
+    def run_sql_injection_through_path_parameters(self):
+        failing_tests = []
+        for endpoint in self.api_spec.endpoints:
+            endpoint_failing_tests = []
+            click.echo(f"    {endpoint.method.upper()} {endpoint.base_url + endpoint.path.path}", nl=False)
+            for url in endpoint.get_urls_with_unsafe_path_params():
+                self.injection_tests += 1
+                test_case = InjectionTestCaseRunner(
+                    test_case=TestCase(
+                        category=AttackStrategy.INJECTION,
+                        test_target="sql_injection__optional_query_parameters",
+                        description=TestDescription(
+                            http_method=getattr(HTTPMethods, endpoint.method.upper()),
+                            url=url, base_url=endpoint.base_url, path=endpoint.path.path,
+                            payload=endpoint.generate_safe_request_payload() if endpoint.has_request_payload() else None,
                         )
                     )
-                    test_case.run()
-                    if test_case.test_case.result == TestResult.FAIL:
-                        failing_tests.append(test_case.test_case)
-                    self.injection_tests += 1
-                    test_case = InjectionTestCaseRunner(
-                        test_case=TestCase(
-                            category=AttackStrategy.INJECTION,
-                            test_target="sql_injection__optional_query_parameters",
-                            description=TestDescription(
-                                http_method=getattr(HTTPMethods, endpoint.method.upper()),
-                                url=url, base_url=endpoint.base_url, path=endpoint.path.path,
-                                payload=endpoint.generate_unsafe_request_payload()
-                            )
-                        )
+                )
+                test_case.run()
+                if test_case.test_case.result == TestResult.FAIL:
+                    endpoint_failing_tests.append(test_case.test_case)
+            if len(endpoint_failing_tests) > 0:
+                failing_tests.extend(endpoint_failing_tests)
+                click.echo("🚨")
+            else:
+                click.echo("✅")
+        return failing_tests
+
+    def run_sql_injection_through_request_payloads(self):
+        failing_tests = []
+        for endpoint in self.api_spec.endpoints:
+            if not endpoint.has_request_payload():
+                continue
+            click.echo(f"    {endpoint.method.upper()} {endpoint.base_url + endpoint.path.path}", nl=False)
+            self.injection_tests += 1
+            test_case = InjectionTestCaseRunner(
+                test_case=TestCase(
+                    category=AttackStrategy.INJECTION,
+                    test_target="sql_injection__optional_query_parameters",
+                    description=TestDescription(
+                        http_method=getattr(HTTPMethods, endpoint.method.upper()),
+                        url=endpoint.safe_url, base_url=endpoint.base_url, path=endpoint.path.path,
+                        payload=endpoint.generate_unsafe_request_payload()
                     )
-                    test_case.run()
-                    if test_case.test_case.result == TestResult.FAIL:
-                        failing_tests.append(test_case.test_case)
+                )
+            )
+            test_case.run()
+            if test_case.test_case.result == TestResult.FAIL:
+                failing_tests.append(test_case.test_case)
+                click.echo("🚨")
+            else:
+                click.echo("✅")
+        return failing_tests
+
+    def run_sql_injection_attacks(self):
+        failing_tests: list[TestCase] = []
+
+        sql_injection_through_query_params_msg = """
+  > Testing SQL injection through URL query parameters
+          """
+        sql_injection_through_path_params_msg = """
+  > Testing SQL injection through URL path parameters
+          """
+        sql_injection_through_request_payloads_msg = """
+  > Testing SQL injection through request payloads
+          """
+
+        click.echo(sql_injection_through_query_params_msg)
+        failing_query_params_tests = self.run_sql_injection_through_query_parameters()
+
+        click.echo(sql_injection_through_path_params_msg)
+        failing_path_params_tests = self.run_sql_injection_through_path_parameters()
+
+        click.echo(sql_injection_through_request_payloads_msg)
+        failing_payload_tests = self.run_sql_injection_through_request_payloads()
+
+        failing_tests += failing_query_params_tests + failing_path_params_tests + failing_payload_tests
+
         failed_tests_file = Path('.fencer/injection_attacks.json')
         failed_tests_file.write_text(
             json.dumps([test.dict() for test in failing_tests], indent=4)

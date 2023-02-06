@@ -154,38 +154,25 @@ class Endpoint:
         )
 
     @property
-    def urls(self):
-        urls = [
-            self.safe_url_path_without_query_params,
-        ]
-        if self.has_required_query_params():
-            urls.extend([
-                self.safe_url_path_with_safe_required_query_params,
-                self.safe_url_path_with_unsafe_required_query_params,
-            ])
-        if self.has_optional_query_params():
-            urls.extend([
-                self.safe_url_path_with_safe_optional_query_params,
-                self.safe_url_path_with_unsafe_optional_query_params,
-            ])
-        if self.path.has_path_params():
-            urls.extend([
-                self.unsafe_url_path_without_query_params,
-            ])
-            if self.has_required_query_params():
-                urls.extend([
-                    self.unsafe_url_path_with_safe_required_query_params,
-                    self.unsafe_url_path_with_unsafe_required_query_params,
-                ])
-            if self.has_optional_query_params():
-                urls.extend([
-                    self.unsafe_url_path_with_safe_optional_query_params,
-                    self.unsafe_url_path_with_unsafe_optional_query_params,
-                ])
-        return urls
+    def safe_url(self):
+        return self.safe_url_path_with_safe_required_query_params
 
-    def get_urls(self):
-        for url in self.urls:
+    def get_urls_with_unsafe_query_params(self):
+        urls = []
+        if self.has_required_query_params():
+            urls.append(self.safe_url_path_with_unsafe_required_query_params)
+        if self.has_optional_query_params():
+            urls.append(self.safe_url_path_with_unsafe_optional_query_params)
+        for url in urls:
+            yield url
+
+    def get_urls_with_unsafe_path_params(self):
+        urls = []
+        if self.path.has_path_params():
+            urls.append(self.unsafe_url_path_without_query_params)
+            if self.has_required_query_params():
+                urls.append(self.unsafe_url_path_with_safe_required_query_params)
+        for url in urls:
             yield url
 
     def has_request_payload(self):
