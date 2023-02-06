@@ -9,6 +9,7 @@ requests = "*"
 jsf = "*"
 click = "*"
 tabulate = "*"
+pyyaml = "*"
 
 [dev-packages]
 black = "*"

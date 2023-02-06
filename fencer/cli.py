@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 
 import click
+import yaml
 from tabulate import tabulate
 
 from .test_runner import TestRunner
@@ -23,8 +24,12 @@ def run(oas_file, base_url):
     click.echo(click.style(f"OpenAPI specification file: {oas_file}", fg="green"))
     click.echo(click.style(f"Base URL: {base_url}", fg="green"))
 
-    # consider yaml specs too
-    spec = json.loads(Path(oas_file).read_text())
+    if oas_file.endswith(".js"):
+        spec = json.loads(Path(oas_file).read_text())
+    elif oas_file.endswith(".yaml"):
+        spec = yaml.safe_load(Path(oas_file).read_text())
+    else:
+        raise Exception("File format not supported!")
     api_spec = APISpec(base_url=base_url, spec=spec)
     api_spec.load_endpoints()
 
