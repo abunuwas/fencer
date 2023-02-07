@@ -193,18 +193,23 @@ class Endpoint:
                     urls.append(url)
         return urls
 
-    @property
-    def unsafe_url_path_without_query_params(self):
-        return self.base_url + self.path.build_insecure_path()
+    def get_unsafe_url_path_without_query_params(self):
+        urls = []
+        for param in self.path.path_params_list:
+            for strategy in sql_injection_strategies:
+                path = self.path.path.replace(param, strategy)
+                urls.append(self.base_url + path)
+        return urls
 
-    @property
-    def unsafe_url_path_with_safe_required_query_params(self):
-        return (
-                self.unsafe_url_path_without_query_params + '?'
+    def get_unsafe_url_path_with_safe_required_query_params(self):
+        urls = []
+        for base_url in self.get_unsafe_url_path_without_query_params():
+            urls.append(
+                base_url + '?'
                 + '&'.join(f"{param['name']}={fake_parameter(param['schema'])}"
                            for param in self.required_query_params)
-        )
-
+            )
+        return urls
 
     @property
     def safe_url(self):
@@ -222,9 +227,9 @@ class Endpoint:
     def get_urls_with_unsafe_path_params(self):
         urls = []
         if self.path.has_path_params():
-            urls.append(self.unsafe_url_path_without_query_params)
+            urls.extend(self.get_unsafe_url_path_without_query_params())
             if self.has_required_query_params():
-                urls.append(self.unsafe_url_path_with_safe_required_query_params)
+                urls.extend(self.get_unsafe_url_path_with_safe_required_query_params())
         for url in urls:
             yield url
 
@@ -303,12 +308,6 @@ class APIPath:
                 JSF({'type': 'string'}).generate().split(' ')[0],
             )
 
-        return path
-
-    def build_insecure_path(self):
-        path = self.path
-        for param in self.path_params_list:
-            path = self.path.replace(param, dangerous_sql)
         return path
 
 
