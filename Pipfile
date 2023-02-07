@@ -10,6 +10,7 @@ jsf = "*"
 click = "*"
 tabulate = "*"
 pyyaml = "*"
+exrex = "*"
 
 [dev-packages]
 black = "*"
