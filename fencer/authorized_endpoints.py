@@ -1,9 +1,9 @@
 import click
 import requests
 
-from .main import APISpec
+from .api_spec import APISpec
 from .test_case import AttackStrategy, TestDescription, HTTPMethods, TestCase, TestResult, \
-    VulnerabilitySeverityLevel, TestReporter
+    VulnerabilitySeverityLevel
 
 
 class UnauthorizedAccessTestCaseRunner:
@@ -47,7 +47,6 @@ class TestAuthEndpoints:
     def __init__(self, api_spec: APISpec):
         self.api_spec = api_spec
         self.auth_tests = 0
-        self.reports: list[TestReporter] = []
 
     def test_authorized_endpoints(self):
         failing_tests = []

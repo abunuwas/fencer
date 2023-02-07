@@ -8,24 +8,6 @@ from datetime import datetime
 import exrex
 from jsf import JSF
 
-dangerous_sql = "1' OR 1=1 --"
-
-sql_injection_strategies = [
-    "' OR 1=1 --",
-    "' UNION SELECT * FROM information_schema.tables --",
-    '"; DROP TABLE users --',
-    "'; SELECT user, password FROM users WHERE '1' = '1",
-    "'; SELECT id FROM users WHERE '1' = '1",
-    "' OR '1' = '1",
-    "' OR username LIKE '%",
-    ' OR "1"="1"',
-    "%' AND 1=0 UNION SELECT * FROM information_schema.tables --",
-    "%' OR 1=1; --",
-    "' UNION SELECT NULL, table_name FROM information_schema.tables WHERE 2 > 1 \"\"",
-]
-
-nosql_injection_strategies = []
-
 standard_http_methods = ['get', 'post', 'put', 'patch', 'delete', 'options', 'head']
 
 
@@ -50,6 +32,10 @@ class NumberRanges:
 
 
 def fake_parameter(schema):
+    if schema.get('example'):
+        return schema['example']
+    if schema.get('default'):
+        return schema['default']
     if schema['type'] == 'string':
         if 'format' not in schema:
             if schema.get('pattern'):
@@ -149,91 +135,11 @@ class Endpoint:
                            for param in self.required_query_params)
         )
 
-    def get_safe_url_path_with_unsafe_required_query_params(self):
-        urls = []
-        for param in self.required_query_params:
-            for strategy in sql_injection_strategies:
-                param_value = f'?{param["name"]}={strategy}'
-                other_params = [
-                    other_param for other_param in self.required_query_params
-                    if other_param['name'] != param['name']
-                ]
-                if len(other_params) > 0:
-                    param_value += '&'
-                other_params = '&'.join(
-                    f"{other_param['name']}={fake_parameter(param['schema'])}"
-                    for other_param in other_params
-                )
-                url = self.safe_url_path_without_query_params + param_value + other_params
-                urls.append(url)
-        return urls
-
-    def get_safe_url_path_with_unsafe_optional_query_params(self):
-        urls = []
-        base_url = (
-            self.safe_url_path_with_safe_required_query_params
-            if self.has_required_query_params()
-            else self.safe_url_path_without_query_params
-        )
-        if self.has_required_query_params():
-            for param in self.optional_query_params:
-                for strategy in sql_injection_strategies:
-                    param_value = f'?{param["name"]}={strategy}'
-                    other_params = [
-                        other_param for other_param in self.optional_query_params
-                        if other_param['name'] != param['name']
-                    ]
-                    if len(other_params) > 0:
-                        param_value += '&'
-                    other_params = '&'.join(
-                        f"{other_param['name']}={fake_parameter(param['schema'])}"
-                        for other_param in other_params
-                    )
-                    url = base_url + param_value + other_params
-                    urls.append(url)
-        return urls
-
-    def get_unsafe_url_path_without_query_params(self):
-        urls = []
-        for param in self.path.path_params_list:
-            for strategy in sql_injection_strategies:
-                path = self.path.path.replace(param, strategy)
-                urls.append(self.base_url + path)
-        return urls
-
-    def get_unsafe_url_path_with_safe_required_query_params(self):
-        urls = []
-        for base_url in self.get_unsafe_url_path_without_query_params():
-            urls.append(
-                base_url + '?'
-                + '&'.join(f"{param['name']}={fake_parameter(param['schema'])}"
-                           for param in self.required_query_params)
-            )
-        return urls
-
     @property
     def safe_url(self):
         if self.has_required_query_params():
             return self.safe_url_path_with_safe_required_query_params
         return self.safe_url_path_without_query_params
-
-    def get_urls_with_unsafe_query_params(self):
-        urls = []
-        if self.has_required_query_params():
-            urls.extend(self.get_safe_url_path_with_unsafe_required_query_params())
-        if self.has_optional_query_params():
-            urls.extend(self.get_safe_url_path_with_unsafe_optional_query_params())
-        for url in urls:
-            yield url
-
-    def get_urls_with_unsafe_path_params(self):
-        urls = []
-        if self.path.has_path_params():
-            urls.extend(self.get_unsafe_url_path_without_query_params())
-            if self.has_required_query_params():
-                urls.extend(self.get_unsafe_url_path_with_safe_required_query_params())
-        for url in urls:
-            yield url
 
     def has_request_payload(self):
         if self.body is None:
@@ -243,36 +149,6 @@ class Endpoint:
     def generate_safe_request_payload(self):
         schema = self.body['content']['application/json']['schema']
         return JSF(schema).generate()
-
-    def _inject_dangerous_sql_in_payload(self, payload, schema):
-        # need to include anyOf, allOf
-        if schema['type'] == 'array':
-            return [
-                self._inject_dangerous_sql_in_payload(item, schema['items'])
-                for item in payload
-            ]
-        if schema['type'] == 'object':
-            # sometimes properties aren't specified so soft access
-            for name, description in schema.get('properties', {}).items():
-                # property may not be required
-                if name not in payload:
-                    continue
-                if description['type'] == 'string':
-                    payload[name] = dangerous_sql
-                if description['type'] == 'array':
-                    payload[name] = self._inject_dangerous_sql_in_payload(
-                        payload[name], description
-                    )
-        return payload
-
-    def generate_unsafe_request_payload(self):
-        schema = self.body['content']['application/json']['schema']
-        if 'allOf' in schema:
-            schema = schema['allOf'][0]
-        if 'anyOf' in schema:
-            schema = schema['anyOf'][0]
-        payload = JSF(schema).generate()
-        return self._inject_dangerous_sql_in_payload(payload, schema)
 
 
 @dataclass
@@ -311,7 +187,7 @@ class APIPath:
         for param in self._undocumented_path_params:
             path = path.replace(
                 f'{{{param["name"]}}}',
-                JSF({'type': 'string'}).generate().split(' ')[0],
+                fake_parameter({'type': 'string'}),
             )
 
         return path

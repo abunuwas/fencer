@@ -7,7 +7,7 @@ from tabulate import tabulate
 
 from .test_runner import TestRunner
 from . import __version__
-from .main import APISpec
+from .api_spec import APISpec
 
 
 @click.group()
