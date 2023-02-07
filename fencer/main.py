@@ -213,7 +213,9 @@ class Endpoint:
 
     @property
     def safe_url(self):
-        return self.safe_url_path_with_safe_required_query_params
+        if self.has_required_query_params():
+            return self.safe_url_path_with_safe_required_query_params
+        return self.safe_url_path_without_query_params
 
     def get_urls_with_unsafe_query_params(self):
         urls = []
@@ -265,6 +267,10 @@ class Endpoint:
 
     def generate_unsafe_request_payload(self):
         schema = self.body['content']['application/json']['schema']
+        if 'allOf' in schema:
+            schema = schema['allOf'][0]
+        if 'anyOf' in schema:
+            schema = schema['anyOf'][0]
         payload = JSF(schema).generate()
         return self._inject_dangerous_sql_in_payload(payload, schema)
 
@@ -373,6 +379,18 @@ class APISpec:
         if '$ref' in body['content']['application/json']['schema']:
             schema = self.resolve_schema(body['content']['application/json']['schema']['$ref'])
             body['content']['application/json']['schema'] = schema
+
+        if 'allOf' in body['content']['application/json']['schema']:
+            for index, schema in enumerate(body['content']['application/json']['schema']['allOf']):
+                if '$ref' in schema:
+                    schema = self.resolve_schema(schema['$ref'])
+                    body['content']['application/json']['schema']['allOf'][index] = schema
+
+        if 'anyOf' in body['content']['application/json']['schema']:
+            for index, schema in enumerate(body['content']['application/json']['schema']['anyOf']):
+                if '$ref' in schema:
+                    schema = self.resolve_schema(schema['$ref'])
+                    body['content']['application/json']['schema']['anyOf'][index] = schema
 
         return body
 
