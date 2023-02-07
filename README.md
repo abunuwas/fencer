@@ -54,7 +54,7 @@ For example:
 $ fencer run --oas-file openapi.json --base-url http://localhost:5000
 ```
 
-![image info](img/fencer_demo.gif)
+![image info](https://github.com/abunuwas/fencer/blob/742b9dd62bae3dadd838b7085336da7cdc98a06b/img/fencer_demo.gif)
 
 ## Contributing
 
