@@ -24,9 +24,9 @@ def run(oas_file, base_url):
     click.echo(click.style(f"OpenAPI specification file: {oas_file}", fg="green"))
     click.echo(click.style(f"Base URL: {base_url}", fg="green"))
 
-    if oas_file.endswith(".js"):
+    if oas_file.endswith(".json"):
         spec = json.loads(Path(oas_file).read_text())
-    elif oas_file.endswith(".yaml"):
+    elif oas_file.endswith(".yaml") or oas_file.endswith(".yml"):
         spec = yaml.safe_load(Path(oas_file).read_text())
     else:
         raise Exception("File format not supported!")
