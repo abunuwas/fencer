@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.3.1
+
+* Add missing dependencies to pyproject.toml
+
 ## 0.3.0
 
 * Add test runner for authorized endpoints access test
