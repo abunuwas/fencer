@@ -6,7 +6,7 @@ name = "pypi"
 [packages]
 aiohttp = "*"
 requests = "*"
-jsf = "*"
+jsf = "==0.5.1"
 click = "*"
 tabulate = "*"
 pyyaml = "*"

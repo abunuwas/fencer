@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.3.2
+
+* Fix compatibility with older versions of Python
+
 ## 0.3.1
 
 * Add missing dependencies to pyproject.toml
