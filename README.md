@@ -24,9 +24,24 @@ directly against production.
 
 ---
 
+## Limitations
+
+Fencer is still pretty much work in progress. I'm adding new features every day, but there's still a long way to go.
+I very much welcome contributions to make progress faster. At the moment, these are the most important limitations:
+
+* Only works with Python 3.10 and upwards for now
+* Only works with API specifications available as local files in JSON or YAML
+* Only works with OpenAPI 3.X.X and probably has missing features
+* A lot of tests are missing, e.g. noSQL injection, command injection, JWT tests, and so on. I'll include them as 
+  soon as I can.
+* The CLI is super simple at the moment but will soon get better.
+* Failing tests are stored under a folder named `.fencer/` relative to the directory from which you run the tool.
+  As soon as I can, I'll add commands to work with those tests and be able to visualise them and storage will be
+  optional too.
+
 ## Requirements
 
-Python 3.7+
+Python 3.10+
 
 ## Installation
 
