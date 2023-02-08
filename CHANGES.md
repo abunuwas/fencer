@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 0.3.3
+
+* Due to JSF we can only support Python from 3.10 upwards, so removing support for older versions.
+  Looking to create custom faker to resolve this problem
+
 ## 0.3.2
 
 * Fix compatibility with older versions of Python
