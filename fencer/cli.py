@@ -34,7 +34,7 @@ def run(oas_file, base_url):
     api_spec.load_endpoints()
 
     click.echo("Creating .fencer/ folder to store failing tests...")
-    (Path(__file__).parent / '.fencer').mkdir(exist_ok=True)
+    Path('.fencer').mkdir(exist_ok=True)
 
     test_runner = TestRunner(api_spec=api_spec)
 

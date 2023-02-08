@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.3.6
+
+* Create .fencer/ folder in the right place
+
 ## 0.3.5
 
 * Update README
