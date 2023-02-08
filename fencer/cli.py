@@ -33,6 +33,9 @@ def run(oas_file, base_url):
     api_spec = APISpec(base_url=base_url, spec=spec)
     api_spec.load_endpoints()
 
+    click.echo("Creating .fencer/ folder to store failing tests...")
+    (Path(__file__).parent / '.fencer').mkdir(exist_ok=True)
+
     test_runner = TestRunner(api_spec=api_spec)
 
     injection_message = """

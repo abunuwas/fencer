@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.3.4
+
+* Make sure .fencer folder is created
+
 ## 0.3.3
 
 * Due to JSF we can only support Python from 3.10 upwards, so removing support for older versions.
