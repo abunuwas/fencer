@@ -4,7 +4,7 @@ import string
 import uuid
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Union, Optional
+from typing import Union, Optional, List
 
 import exrex
 from jsf import JSF
@@ -88,8 +88,8 @@ class Endpoint:
     api_path: str
     method: str
     parameters: list
-    body: Optional[dict]
     responses: dict
+    body: Optional[dict] = None
     security: Optional[Union[dict, list]] = None
 
     def __post_init__(self):
@@ -171,23 +171,27 @@ class Endpoint:
 @dataclass
 class APIPath:
     path: str
-    path_params_schemas: list
-
-    path_param_regex = re.compile('{.*?}')
+    path_params_schemas: Optional[List] = None
 
     def __post_init__(self):
+        self.path_param_regex = re.compile('{(.*?)}')
         self.path_params_list = self.path_param_regex.findall(self.path)
-        self._undocumented_path_params = [
-            param for param in self.path_params_schemas if param['name'] not in self.path
+        if self.path_params_schemas is None:
+            self.path_params_schemas = []
+
+    @property
+    def undocumented_path_params(self):
+        return [
+            param for param in self.path_params_list if param not in self.path_params_schemas
         ]
 
     def has_path_params(self):
         return len(self.path_params_list) > 0
 
     def has_undocumented_path_params(self):
-        return len(self._undocumented_path_params) > 0
+        return len(self.undocumented_path_params) > 0
 
-    def build_safe_path(self):
+    def build_safe_path(self, fake_param_strategy=fake_parameter):
         if not self.has_path_params():
             return self.path
 
@@ -195,16 +199,16 @@ class APIPath:
         for param in self.path_params_schemas:
             path = path.replace(
                 f'{{{param["name"]}}}',
-                fake_parameter(param['schema']),
+                str(fake_param_strategy(param['schema'])),
             )
 
         if not self.has_undocumented_path_params():
             return path
 
-        for param in self._undocumented_path_params:
+        for param in self.undocumented_path_params:
             path = path.replace(
-                f'{{{param["name"]}}}',
-                fake_parameter({'type': 'string'}),
+                f'{{{param}}}',
+                fake_param_strategy({'type': 'string'}),
             )
 
         return path
@@ -287,15 +291,38 @@ class APISpec:
 
         return body
 
+    def _merge_schemas(self, schema1, schema2):
+        if schema1.get('required') is None:
+            schema1['required'] = []
+
+        # merge required properties
+        for required in schema2.get('required', []):
+            if required not in schema1['required']:
+                schema1['required'].append(required)
+
+        # merge properties
+        for name, schema in schema2['properties'].items():
+            if name not in schema1['properties']:
+                schema1['properties'][name] = schema
+
+        return schema1
+
     def resolve_schema(self, schema_ref):
         schema_name = schema_ref.split('/')[-1]
         schema = self.spec['components']['schemas'][schema_name]
 
         if 'allOf' in schema:
-            raise Exception('allOf not implemented')
+            for nested_schema in schema['allOf']:
+                if '$ref' in nested_schema:
+                    resolved_schema = self.resolve_schema(nested_schema['$ref'])
+                    schema = self._merge_schemas(schema, resolved_schema)
+                else:
+                    schema = self._merge_schemas(schema, nested_schema)
 
         if 'anyOf' in schema:
-            raise Exception('anyOf not implemented')
+            for index, nested_schema in enumerate(schema['anyOf']):
+                if '$ref' in nested_schema:
+                    schema['anyOf'][index] = self.resolve_schema(nested_schema['$ref'])
 
         for name, description in schema['properties'].items():
             if '$ref' in description:
