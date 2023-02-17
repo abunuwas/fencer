@@ -19,8 +19,6 @@ class UnauthorizedAccessTestCaseRunner:
         self.resolve_test_result()
 
     def resolve_test_result(self):
-        """
-        """
         # If the server fails to respond, endpoint is protected and there's no possibility for exploit,
         # but we can break the server, so we give it a medium severity
         if self.response is None:

@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Any
+from typing import Any, Optional
 
 test_case_example = {
     "id": "asdf",
@@ -67,12 +67,12 @@ class TestCase:
     description: TestDescription
 
     # to be set by the object
-    started: datetime | None = None
-    ended: datetime | None = None
+    started: Optional[datetime] = None
+    ended: Optional[datetime] = None
 
     # to be set after test run
-    result: TestResult | None = None
-    severity: VulnerabilitySeverityLevel | None = None
+    result: Optional[TestResult] = None
+    severity: Optional[VulnerabilitySeverityLevel] = None
 
     def __post_init__(self):
         self.started = datetime.now(timezone.utc)
