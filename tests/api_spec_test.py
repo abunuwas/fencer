@@ -55,11 +55,11 @@ def test_produce_safe_path_with_documented_path_param():
 
 def test_produce_safe_query_param_value():
     path = '/orders'
-    path_obj = Endpoint(
+    endpoint = Endpoint(
         base_url='', method='', responses={}, api_path=path,
         parameters=[{'name': 'order_id', 'schema': {'type': 'integer'}, 'in': 'query', 'required': True}]
     )
-    safe_url = path_obj.safe_url_path_with_safe_required_query_params
+    safe_url = endpoint.safe_url_path_with_safe_required_query_params
     query_param_value = safe_url.split('?')[-1].split('=')[-1]
     assert query_param_value.isdigit()
 
