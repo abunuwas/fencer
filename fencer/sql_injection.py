@@ -134,8 +134,6 @@ class SQLInjectionEndpoint:
         # this should be plural returning an array of payloads with different
         # sql injection strategies
         schema = self.endpoint.body['content']['application/json']['schema']
-        if 'allOf' in schema:
-            schema = schema['allOf'][0]
         if 'anyOf' in schema:
             schema = schema['anyOf'][0]
         payload = JSF(schema).generate()
