@@ -4,6 +4,7 @@ import string
 import uuid
 from dataclasses import dataclass
 from datetime import datetime
+from typing import Union, Optional
 
 import exrex
 from jsf import JSF
@@ -72,20 +73,36 @@ def fake_parameter(schema):
 
 
 @dataclass
+class BasicEndpoint:
+    method: str
+    path: str
+    base_url: str
+
+    def __str__(self):
+        return f"{self.method.upper()} {self.base_url}{self.base_url}"
+
+
+@dataclass
 class Endpoint:
     base_url: str
     api_path: str
     method: str
     parameters: list
-    body: dict | None
+    body: Optional[dict]
     responses: dict
-    security: dict | list | None = None
+    security: Optional[Union[dict, list]] = None
 
     def __post_init__(self):
         self.path = APIPath(
             path=self.api_path,
             path_params_schemas=self.path_params
         )
+        self.endpoint = BasicEndpoint(
+            method=self.method, path=self.api_path, base_url=self.base_url
+        )
+
+    def __str__(self):
+        return str(self.endpoint)
 
     @property
     def query_params(self):
@@ -241,7 +258,7 @@ class APISpec:
                     )
                 )
 
-    def resolve_body(self, body: dict | None):
+    def resolve_body(self, body: Optional[dict]):
         if body is None:
             return
 
