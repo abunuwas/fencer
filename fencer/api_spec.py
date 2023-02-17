@@ -87,12 +87,13 @@ class Endpoint:
     base_url: str
     api_path: str
     method: str
-    parameters: list
-    responses: dict
+    responses: Optional[dict] = None
+    parameters: Optional[List] = None
     body: Optional[dict] = None
     security: Optional[Union[dict, list]] = None
 
     def __post_init__(self):
+        self.parameters = self.parameters or []
         self.path = APIPath(
             path=self.api_path,
             path_params_schemas=self.path_params
@@ -291,7 +292,8 @@ class APISpec:
 
         return body
 
-    def _merge_schemas(self, schema1, schema2):
+    @staticmethod
+    def _merge_schemas(schema1, schema2):
         if schema1.get('required') is None:
             schema1['required'] = []
 
