@@ -4,6 +4,7 @@ from pathlib import Path
 import click
 
 from .api_spec import APISpec
+from .IDOR import IDORTestRunner
 from .authorized_endpoints import TestAuthEndpoints
 from .sql_injection import SQLInjectionTestRunner
 from .test_case import AttackStrategy, TestCase, VulnerabilitySeverityLevel, TestReporter
@@ -66,6 +67,21 @@ class TestRunner:
             high_severity=sum(1 for test in failing_tests if test.severity == VulnerabilitySeverityLevel.HIGH),
         ))
         failed_tests_file = Path('.fencer/unauthorized_access_attacks.json')
+        failed_tests_file.write_text(
+            json.dumps([test.dict() for test in failing_tests], indent=4)
+        )
+    def run_idor_attacks(self):
+        test_runner = IDORTestRunner(api_spec=self.api_spec)
+        failing_tests = test_runner.run_idor_tests()
+        self.reports.append(TestReporter(
+            category=AttackStrategy.IDOR,
+            number_tests=test_runner.idor_tests,
+            failing_tests=len(failing_tests),
+            low_severity=sum(1 for test in failing_tests if test.severity == VulnerabilitySeverityLevel.LOW),
+            medium_severity=sum(1 for test in failing_tests if test.severity == VulnerabilitySeverityLevel.MEDIUM),
+            high_severity=sum(1 for test in failing_tests if test.severity == VulnerabilitySeverityLevel.HIGH),
+        ))
+        failed_tests_file = Path('.fencer/idor_attacks.json')
         failed_tests_file.write_text(
             json.dumps([test.dict() for test in failing_tests], indent=4)
         )

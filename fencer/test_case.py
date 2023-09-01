@@ -26,6 +26,7 @@ class AttackStrategy(Enum):
     SURFACE_ATTACKS = "surface_attacks"
     MASS_ASSIGNMENT = "mass_assignment"
     INSECURE_DESIGN = "insecure_design"
+    IDOR = "IDOR"
 
 
 class TestResult(Enum):
