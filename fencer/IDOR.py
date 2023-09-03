@@ -70,7 +70,7 @@ class IDORTestRunner:
         failing_tests = []
         for endpoint in self.api_spec.endpoints:
             idor_endpoint = IDOREndpoint(endpoint)
-            for altered_url in idor_endpoint.get_urls_with_altered_user_ids():
+            for altered_url in idor_endpoint.get_urls_with_altered_ids():
                 self.idor_tests += 1
                 click.echo(f"    {endpoint.method.upper()} {altered_url}", nl=False)
 
