@@ -33,6 +33,7 @@ class TestResult(Enum):
     SUCCESS = "success"
     FAIL = "fail"
     UNDETERMINED = "undetermined"
+    ERROR = "error"
 
 
 class VulnerabilitySeverityLevel(Enum):

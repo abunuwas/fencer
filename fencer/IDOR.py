@@ -12,15 +12,15 @@ from .test_case import TestResult, TestCase, AttackStrategy, TestDescription, HT
 @dataclass
 class IDOREndpoint:
     endpoint: Endpoint
-    fake_user_id_strategy: Optional[Callable] = None
+    fake_id_strategy: Optional[Callable] = None
 
     def fake_id(self):
-        return str(random.randint(1,100))
+        return str(random.randint(1,100)) 
 
     def __post_init__(self):
-        self.fake_user_id_strategy = self.fake_user_id_strategy or self.fake_id
+        self.fake_id_strategy = self.fake_id_strategy or self.fake_id
 
-    def get_altered_url_with_different_ids(self):
+    def get_altered_url_with_different_ids(self): # 回傳改變後有偽造ID的URL
         # Detect all path parameters
         path_parameters = re.findall(r"\{(\w+)\}", self.endpoint.safe_url)
         
