@@ -65,9 +65,31 @@ class IDORTestRunner:
         self.api_spec = api_spec
         self.idor_tests = 0
         self.reports = []
+    def create_account(self):
+        create_account_endpoint = None
+        for endpoint in self.api_spec.endpoints:
+            if endpoint.method == "post" and "/signup" in endpoint.path:
+                create_account_endpoint = endpoint
+                break
+        if create_account_endpoint:
+            # 生成有效載荷
+            payload = create_account_endpoint.generate_safe_request_payload()
+
+            # 發送請求
+            response = requests.post(create_account_endpoint.safe_url, json=payload)
+
+            # 檢查回應
+            if response.status_code == 200:
+                print("Successfully created an account with the generated payload!")
+                return response.json()
+            else:
+                print(f"Failed to create an account. Status Code: {response.status_code}")
+        else:
+            print("Could not find the specified endpoint.")
 
     def run_idor_tests(self):
         failing_tests = []
+        account_info = self.create_account()
         for endpoint in self.api_spec.endpoints:
             idor_endpoint = IDOREndpoint(endpoint)
             for altered_url in idor_endpoint.get_urls_with_altered_ids():
