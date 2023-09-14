@@ -13,6 +13,7 @@ class UnauthorizedAccessTestCaseRunner:
 
     def run(self):
         callable_ = getattr(requests, self.test_case.description.http_method.value.lower())
+        print(self.test_case.description.payload)
         self.response = callable_(
             self.test_case.description.url, json=self.test_case.description.payload
         )
