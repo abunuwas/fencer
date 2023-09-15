@@ -37,7 +37,7 @@ def run(oas_file, base_url):
     Path('.fencer').mkdir(exist_ok=True)
 
     test_runner = TestRunner(api_spec=api_spec)
-
+    #SQl injection
     injection_message = """
   -------------------------
   Testing injection attacks
