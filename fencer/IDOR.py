@@ -68,7 +68,7 @@ class IDORTestRunner:
     def create_account(self):
         create_account_endpoint = None
         for endpoint in self.api_spec.endpoints:
-            if endpoint.method == "post" and "/signup" in endpoint.path:
+            if endpoint.method == "post" and "/signup" in endpoint.path.path:
                 create_account_endpoint = endpoint
                 break
         if create_account_endpoint:
