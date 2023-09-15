@@ -42,15 +42,15 @@ def run(oas_file, base_url):
   -------------------------
   Testing injection attacks
   -------------------------"""
-    click.echo(injection_message)
-    test_runner.run_sql_injection_attacks()
+    #click.echo(injection_message)
+    #test_runner.run_sql_injection_attacks()
 
     injection_message = """
   -------------------------
   Testing unauthorized access
   -------------------------"""
-    click.echo(injection_message)
-    test_runner.run_unauthorized_access_attacks()
+    #click.echo(injection_message)
+    #test_runner.run_unauthorized_access_attacks()
 
     idor_message = """
   -------------------------
