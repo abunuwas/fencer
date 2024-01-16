@@ -70,6 +70,9 @@ class TestRunner:
         failed_tests_file.write_text(
             json.dumps([test.dict() for test in failing_tests], indent=4)
         )
+        
+    def run_BOLA_test(self):
+        pass
 
     def run_surface_attacks(self):
         pass
