@@ -36,22 +36,23 @@ class TestBOLA:
     def __init__(self, api_spec: APISpec):
         self.api_spec = api_spec
         self.paths = api_spec.paths
-    def is_identifier(self):
-        if len(self.api_spec.authorized_endpoints()) > 0:
+
+    def is_identifier(self,parameter): # If parameter is_identifier then return True else return False
+        if parameter.get('in') == 'path' and parameter.get('require',True):
             return True
-        else:
-            return False
+        return False
         
-    def annotate_with_table_2_properties(self,item,table_2_properties):
-        
+    def annotate_with_parameters_table_2_properties(self,item,table_2_properties):
         if 'in' in item:
             parameter_location = item['in']
         #properties_to_annotate = table_2_parameters_properties.get(parameter_location,{})
         item['Parameter-level-properties:']
-        item['is_identifier:'] = str(self.is_identifier())
+        item['is_identifier:'] = str(self.is_identifier(item))
         item['Location:'] = table_2_parameters_properties[parameter_location]
         item['type:'] = self.api_spec.schema['type']
-        
+
+    def annotate_with_operation_table_2_properties(self,operation):
+        pass
 
     def properties_analyzer(self):
         if self.api_spec.authorized_endpoints(): # 如果有Security authorization
