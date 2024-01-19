@@ -52,8 +52,14 @@ def run(oas_file, base_url):
     click.echo(injection_message)
     test_runner.run_unauthorized_access_attacks()
 
+    injection_message = """
+  -------------------------
+        Testing BOLA
+  -------------------------"""
+    click.echo(injection_message)
+    test_runner.run_BOLA_test()
     click.echo()
-
+    
     click.echo(click.style("  SUMMARY", fg="green"))
 
     click.echo()
