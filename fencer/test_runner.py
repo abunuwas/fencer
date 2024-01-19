@@ -4,7 +4,7 @@ from pathlib import Path
 import click
 
 from .api_spec import APISpec
-from .BOLA import IDORTestRunner
+from .BOLA import TestBOLA
 from .authorized_endpoints import TestAuthEndpoints
 from .sql_injection import SQLInjectionTestRunner
 from .test_case import AttackStrategy, TestCase, VulnerabilitySeverityLevel, TestReporter
@@ -72,7 +72,8 @@ class TestRunner:
         )
         
     def run_BOLA_test(self):
-        pass
+        test_runner = TestBOLA(api_spec=self.api_spec)
+        test_runner.properties_analyzer()
 
     def run_surface_attacks(self):
         pass
