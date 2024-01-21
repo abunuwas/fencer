@@ -41,6 +41,11 @@ class TestBOLA:
             return True
         return False
         
+    def check_authorization(self,operation):
+        if len(operation.get('security')) > 0:
+            return True
+        return False
+
     def annotate_with_parameters_table2_properties(self,item,table_2_properties):
         if 'in' in item:
             parameter_location = item['in']
@@ -53,25 +58,37 @@ class TestBOLA:
         return item
     
     def annotate_with_operation_table2_properties(self,operation):
-        pass
+        if 'parameters' in operation:
+            parameter = operation['parameters']
+        if self.is_identifier(parameter):
+            identified = 'single'
+        else:
+            identified = 'Zero'
+
+        method_level_properties = {
+            'has_body':parameter.get('in') == 'body',
+            'identifier_used':identified,
+            'authorization_required':self.check_authorization(operation)
+        }
+        operation['method_level_properties'] = method_level_properties
 
     def properties_analyzer(self):
         if 'securitySchemes' in self.api_spec.components: # 如果有Security authorization
             if self.paths:    #api_spc是否有Paths屬性
                 for path,path_data in self.paths.items(): # path代表API端點，而path_data代表此端點所包含的物件和屬性
+                    #print(path)
                     if 'parameters' in path_data:
                         for parameters in path_data['parameters']:
                           annotate_parameters = self.annotate_with_parameters_table2_properties(parameters,table_2_parameters_properties)
-                          print(annotate_parameters)
-                    """
-                    if any(method in standard_http_methods for method in self.paths[path].keys()): # 檢查path item是否有operation物件(GET、POST,etc)
-                        operation = self.paths[path].keys() # 取得Path中的Http_Method
-                        if 'parameters' in operation:
-                            parameters = path['parameters']
-                            self.annotate_with_parameters_table_2_properties(parameters,table_2_parameters_properties)
-                        else:
-                            pass
-                    """
+                          #print(annotate_parameters)
+                    #print(path_data.keys())
+                    
+                    for method in path_data: # Get path_data keys about http_method
+                        if method in standard_http_methods: # 檢查path item是否有operation物件(GET、POST,etc)
+                            self.annotate_with_operation_table2_properties(method)
+                            if 'parameters' in method:
+                                parameters = method['parameters']
+                                self.annotate_with_parameters_table2_properties(parameters,table_2_parameters_properties)
             else:
                 print("沒有paths物件")
         else:
