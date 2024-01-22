@@ -41,12 +41,20 @@ class TestBOLA:
             return True
         return False
         
-    def check_authorization(self,operation):
-        if len(operation.get('security')) > 0:
+    def check_authorization(self,operation_dict):
+        if len(operation_dict.get('security')) > 0:
+            return True
+        return False
+    
+    def only_operation_parameters(self,operation_dict):
+        paramters = operation_dict.get('parameters',[])
+        request_body = operation_dict.get('requestBody', {})
+        if paramters and not request_body:
             return True
         return False
 
-    def annotate_with_parameters_table2_properties(self,item,table_2_properties):
+
+    def annotate_with_parameters_table2_properties(self,item):
         if 'in' in item:
             parameter_location = item['in']
         parameter_level_properties = {
@@ -57,20 +65,23 @@ class TestBOLA:
         item['Parameter-level-properties'] = parameter_level_properties
         return item
     
-    def annotate_with_operation_table2_properties(self,operation):
-        if 'parameters' in operation:
-            parameter = operation['parameters']
-        if self.is_identifier(parameter):
-            identified = 'single'
-        else:
-            identified = 'Zero'
+    def annotate_with_operation_table2_properties(self,operation_dict):
+        parameter:dict
+        if 'parameters' in operation_dict:
+            parameter = operation_dict['parameters']
+            if self.is_identifier(parameter):
+                identified = 'single'
+            else:
+                identified = 'Zero'
 
         method_level_properties = {
-            'has_body':parameter.get('in') == 'body',
+            'operation_only_parameters_specified':self.only_operation_parameters(operation_dict),
+            'parameter_required':parameter.get('require'),
+            'has_body':'requestBody' in operation_dict,
             'identifier_used':identified,
-            'authorization_required':self.check_authorization(operation)
+            'authorization_required':self.check_authorization(operation_dict)
         }
-        operation['method_level_properties'] = method_level_properties
+        operation_dict['method_level_properties'] = method_level_properties
 
     def properties_analyzer(self):
         if 'securitySchemes' in self.api_spec.components: # 如果有Security authorization
@@ -79,18 +90,20 @@ class TestBOLA:
                     #print(path)
                     if 'parameters' in path_data:
                         for parameters in path_data['parameters']:
-                          annotate_parameters = self.annotate_with_parameters_table2_properties(parameters,table_2_parameters_properties)
+                          annotate_parameters = self.annotate_with_parameters_table2_properties(parameters)
                           #print(annotate_parameters)
                     #print(path_data.keys())
                     
                     for method in path_data: # Get path_data keys about http_method
+                        #print(method)
                         if method in standard_http_methods: # 檢查path item是否有operation物件(GET、POST,etc)
-                            self.annotate_with_operation_table2_properties(method)
-                            if 'parameters' in method:
-                                parameters = method['parameters']
-                                self.annotate_with_parameters_table2_properties(parameters,table_2_parameters_properties)
+                            operation_dict = path_data[method]
+                            self.annotate_with_operation_table2_properties(operation_dict)
+                            if 'parameters' in operation_dict:
+                                parameters = operation_dict['parameters']
+                                self.annotate_with_parameters_table2_properties(parameters)
             else:
-                print("沒有paths物件")
+                print("No paths object")
         else:
             return
         
