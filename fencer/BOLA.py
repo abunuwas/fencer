@@ -11,7 +11,7 @@ from .test_case import TestResult, TestCase, AttackStrategy, TestDescription, HT
       VulnerabilitySeverityLevel
 
 standard_http_methods = ['get', 'post', 'put', 'patch', 'delete', 'options', 'head']
-
+"""
 table_2_parameters_properties = {
      'path': {
         'description': 'Parameters in the path of the URI.',
@@ -30,12 +30,17 @@ table_2_parameters_properties = {
         'vulnerabilities': ['BOLA']
     }
 }
-
+"""
 class TestBOLA:
     def __init__(self, api_spec: APISpec):
         self.api_spec = api_spec
         self.paths = api_spec.paths
-        
+
+    def has_require(self,parameter):
+        if not parameter or parameter.get('require') == 'false':
+            return False
+        return True
+    
     def is_identifier(self,parameter): # If parameter is_identifier then return True else return False
         if parameter.get('in') == 'path' and parameter.get('require',True):
             return True
@@ -65,23 +70,39 @@ class TestBOLA:
         item['Parameter-level-properties'] = parameter_level_properties
         return item
     
-    def annotate_with_operation_table2_properties(self,operation_dict):
-        parameter:dict
-        if 'parameters' in operation_dict:
-            parameter = operation_dict['parameters']
-            if self.is_identifier(parameter):
-                identified = 'single'
-            else:
-                identified = 'Zero'
+    def annotate_with_operation_table2_properties(self,operation_dict,parameter):
+       
+        if self.is_identifier(parameter):
+            identified = 'single'
+        else:
+            identified = 'Zero'
 
         method_level_properties = {
             'operation_only_parameters_specified':self.only_operation_parameters(operation_dict),
-            'parameter_required':parameter.get('require'),
+            'parameter_required':self.has_require(parameter),
             'has_body':'requestBody' in operation_dict,
             'identifier_used':identified,
             'authorization_required':self.check_authorization(operation_dict)
         }
         operation_dict['method_level_properties'] = method_level_properties
+        return operation_dict
+    
+    def annotate_with_endpoint_table2_properties(self,count,path_data):
+        if count == len(standard_http_methods):
+            http_method_quantity = 'All'
+        elif count > 1:
+            http_method_quantity = 'Multiple'
+        elif count == 1:
+            http_method_quantity = 'Single'
+        else:
+            http_method_quantity = 'Empty'
+
+        endpoint_level_properties = {
+            'defined_http_verbs':http_method_quantity
+        }
+        path_data['endpoint_level_properties'] = endpoint_level_properties
+        return path_data
+
 
     def properties_analyzer(self):
         if 'securitySchemes' in self.api_spec.components: # 如果有Security authorization
@@ -90,18 +111,23 @@ class TestBOLA:
                     #print(path)
                     if 'parameters' in path_data:
                         for parameters in path_data['parameters']:
-                          annotate_parameters = self.annotate_with_parameters_table2_properties(parameters)
-                          #print(annotate_parameters)
-                    #print(path_data.keys())
-                    
+                            self.annotate_with_parameters_table2_properties(parameters)
+                    count = 0 # About endpoint http method quantity
                     for method in path_data: # Get path_data keys about http_method
                         #print(method)
                         if method in standard_http_methods: # 檢查path item是否有operation物件(GET、POST,etc)
+                            count += 1
                             operation_dict = path_data[method]
-                            self.annotate_with_operation_table2_properties(operation_dict)
                             if 'parameters' in operation_dict:
-                                parameters = operation_dict['parameters']
-                                self.annotate_with_parameters_table2_properties(parameters)
+                                for parameters in operation_dict['parameters']:
+                                    annotate_operation = self.annotate_with_operation_table2_properties(operation_dict,parameters)
+                                    self.annotate_with_parameters_table2_properties(parameters)
+                                    #print(annotate_operation)
+                            else:
+                                continue
+                    annotate_path_data = self.annotate_with_endpoint_table2_properties(count,path_data)
+                    #print(annotate_path_data)
+                    #print('----------------')
             else:
                 print("No paths object")
         else:
