@@ -8,7 +8,7 @@ from .BOLA import TestBOLA
 from .authorized_endpoints import TestAuthEndpoints
 from .sql_injection import SQLInjectionTestRunner
 from .test_case import AttackStrategy, TestCase, VulnerabilitySeverityLevel, TestReporter
-
+from .mass_assignment import TestMAEndpoints
 
 class TestRunner:
     def __init__(self, api_spec: APISpec):
@@ -79,7 +79,8 @@ class TestRunner:
         pass
 
     def run_mass_assignment_attacks(self):
-        pass
+        test_runner = TestMAEndpoints(api_spec=self.api_spec)
+        test_runner.test_MA_endpoints()
 
     def run_insecure_design_attacks(self):
         pass
