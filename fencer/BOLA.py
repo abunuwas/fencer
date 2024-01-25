@@ -108,13 +108,11 @@ class TestBOLA:
         if 'securitySchemes' in self.api_spec.components: # 如果有Security authorization
             if self.paths:    #api_spc是否有Paths屬性
                 for path,path_data in self.paths.items(): # path代表API端點，而path_data代表此端點所包含的物件和屬性
-                    #print(path)
                     if 'parameters' in path_data:
                         for parameters in path_data['parameters']:
                             self.annotate_with_parameters_table2_properties(parameters)
                     count = 0 # About endpoint http method quantity
                     for method in path_data: # Get path_data keys about http_method
-                        #print(method)
                         if method in standard_http_methods: # 檢查path item是否有operation物件(GET、POST,etc)
                             count += 1
                             operation_dict = path_data[method]
@@ -122,16 +120,16 @@ class TestBOLA:
                                 for parameters in operation_dict['parameters']:
                                     annotate_operation = self.annotate_with_operation_table2_properties(operation_dict,parameters)
                                     self.annotate_with_parameters_table2_properties(parameters)
-                                    #print(annotate_operation)
                             else:
                                 continue
                     annotate_path_data = self.annotate_with_endpoint_table2_properties(count,path_data)
-                    #print(annotate_path_data)
-                    #print('----------------')
+                return annotate_path_data
             else:
                 print("No paths object")
         else:
             return
         
     def attack_analyzer(self):
-        pass
+        annotate_API_specification = self.properties_analyzer() # 取得經由BOLA/IDOR_properites_analyzer標記過後的API規範檔
+        #print(annotate_API_specification)
+        
