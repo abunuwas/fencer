@@ -73,7 +73,8 @@ class TestRunner:
         
     def run_BOLA_test(self):
         test_runner = TestBOLA(api_spec=self.api_spec)
-        test_runner.properties_analyzer()
+        #test_runner.properties_analyzer()
+        test_runner.attack_analyzer()
 
     def run_surface_attacks(self):
         pass
