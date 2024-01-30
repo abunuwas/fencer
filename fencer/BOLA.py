@@ -11,7 +11,25 @@ from .test_case import TestResult, TestCase, AttackStrategy, TestDescription, HT
       VulnerabilitySeverityLevel
 
 standard_http_methods = ['get', 'post', 'put', 'patch', 'delete', 'options', 'head']
-attack_vector_pattern = {}
+attack_vector_pattern = {
+    'Enumeration':{
+        'without_prior_knowledge':
+        {
+            'description':'Identifier is tampered for enumeration based on automatically or semiautomatically determined pattern',
+            'condition':
+            {
+                'parameter_type':'integer',
+                'uses_authorization':True,
+                'parameter_not_empty':True,
+                'number_of_identifier':'Single'
+            }
+        },
+        'with_prior_knowledge':
+        {
+
+        }
+    },
+}
 class TestBOLA:
     def __init__(self, api_spec: APISpec):
         self.api_spec = api_spec
@@ -84,6 +102,8 @@ class TestBOLA:
         path_data['endpoint_level_properties'] = endpoint_level_properties
         return path_data
 
+    def check_condition(self,condition,endpoint_data,parameter_data,method_data):
+        pass
 
     def properties_analyzer(self):
         annotated_paths = {}
@@ -100,7 +120,7 @@ class TestBOLA:
                             operation_dict = path_data[method]
                             if 'parameters' in operation_dict:
                                 for parameters in operation_dict['parameters']:
-                                    annotate_operation = self.annotate_with_operation_table2_properties(operation_dict,parameters)
+                                    self.annotate_with_operation_table2_properties(operation_dict,parameters)
                                     self.annotate_with_parameters_table2_properties(parameters)
                             else:
                                 continue
@@ -114,5 +134,7 @@ class TestBOLA:
         
     def attack_analyzer(self):
         annotate_API_specification = self.properties_analyzer() # 取得經由BOLA/IDOR_properites_analyzer標記過後的API規範檔
-        print(annotate_API_specification)
+        #print(annotate_API_specification)
+        for path,path_data in annotate_API_specification.items():
+            print(path_data)
         
