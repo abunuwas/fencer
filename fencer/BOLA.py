@@ -12,7 +12,8 @@ from .test_case import TestResult, TestCase, AttackStrategy, TestDescription, HT
 
 standard_http_methods = ['get', 'post', 'put', 'patch', 'delete', 'options', 'head']
 attack_vector_pattern = {
-    'Enumeration':{
+    'Enumeration':
+    {
         'without_prior_knowledge':
         {
             'description':'Identifier is tampered for enumeration based on automatically or semiautomatically determined pattern',
@@ -26,9 +27,55 @@ attack_vector_pattern = {
         },
         'with_prior_knowledge':
         {
-
+            'condition':
+            {
+                'parameter_type':'UUID',
+                'uses_authorization':True,
+                'parameter_not_empty':True,
+                'number_of_identifier':'Single'
+            }
+        },
+        'Add/Change_file_extension':
+        {
+            'condition':
+            {
+                'parameter_type':'string',
+                'uses_authorization':True,
+                'parameter_not_empty':True,
+                'number_of_identifier':'Single'
+            }
+        },
+        'Wildcard(*,%)replacement/appending':
+        {
+            'condition':
+            {
+                'parameter_type':'string',
+                'uses_authorization':True,
+                'parameter_not_empty':True,
+                'number_of_identifier':'Single'
+            }
+        },
+    },
+    'Authorization_token_manipulation':
+    {
+        'Authorization_token_manipulation':
+        {
+            'condition':
+            {
+                'uses_authorization':True
+            }
         }
     },
+    'Parameter_pollution':
+    {
+        'Parameter_pollution':
+        {
+            'condition':
+            {
+
+            }
+        }
+    }
 }
 class TestBOLA:
     def __init__(self, api_spec: APISpec):
@@ -102,8 +149,13 @@ class TestBOLA:
         path_data['endpoint_level_properties'] = endpoint_level_properties
         return path_data
 
-    def check_condition(self,condition,endpoint_data,parameter_data,method_data):
-        pass
+    def check_condition(self,attack_vector_pattern,endpoint_data,parameter_data,method_data):
+        for attack_vector,techniques in attack_vector_pattern: # iterator key e.g(Enumeration,Authorization_token_manipulation,...)
+            for techniques,techniques_info in techniques:
+                if techniques_info['condition']['uses_authorization'] == method_data['authorization_required']:
+                    pass
+                else:
+                    return 
 
     def properties_analyzer(self):
         annotated_paths = {}
@@ -134,7 +186,13 @@ class TestBOLA:
         
     def attack_analyzer(self):
         annotate_API_specification = self.properties_analyzer() # 取得經由BOLA/IDOR_properites_analyzer標記過後的API規範檔
-        #print(annotate_API_specification)
         for path,path_data in annotate_API_specification.items():
-            print(path_data)
+            for path_data,path_data_key in path_data.items():
+                endpoint_data = path_data['endpoint_level_properties']
+                parameter_data = path_data['parameter_level_properties']
+                method_data = path_data['method_level_properties']
+                if endpoint_data and parameter_data and method_data:
+                    self.check_condition(attack_vector_pattern,endpoint_data,parameter_data,method_data)
+                else:
+                    print('Not contain endpoint_data or parameter_data or method_data')
         
