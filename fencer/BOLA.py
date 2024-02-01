@@ -55,6 +55,25 @@ attack_vector_pattern = {
                 'number_of_identifier':'Single'
             }
         },
+        'ID_encoding/decoding':
+        {
+            'condition':
+            {
+                'uses_authorization':True,
+                'parameter_not_empty':True,
+                'number_of_identifier':'Single'
+            }
+        },
+        'JSON(List)appending':
+        {
+            'condition':
+            {
+                'parameter_type':'array',
+                'uses_authorization':True,
+                'parameter_not_empty':True,
+                'number_of_identifier':'Single'
+            }
+        }
     },
     'Authorization_token_manipulation':
     {
@@ -73,6 +92,26 @@ attack_vector_pattern = {
             'condition':
             {
 
+            }
+        }
+    },
+    'Endpoint_verb_tampering':
+    {
+        'Adding_parameters_used_in_other_HTTP_Methods':
+        {
+            'condition':
+            {
+                'endpoint_properties_value':'Multiple',
+                'uses_authorization':True,
+            }
+        },
+        'Change_HTTP_Method(Verb_tampering)':
+        {
+            'description':"Request's verb is changed to another verb that is notspecified in the endpoint's description.",
+            'condition':
+            {
+                'endpoint_properties_value':'All',
+                'number_of_identifier':'Single'
             }
         }
     }
@@ -150,10 +189,15 @@ class TestBOLA:
         return path_data
 
     def check_condition(self,attack_vector_pattern,endpoint_data,parameter_data,method_data):
-        for attack_vector,techniques in attack_vector_pattern: # iterator key e.g(Enumeration,Authorization_token_manipulation,...)
-            for techniques,techniques_info in techniques:
+        for attack_vector,techniques in attack_vector_pattern.items(): # iterator key e.g(Enumeration,Authorization_token_manipulation,...)
+            print(attack_vector," ",techniques)
+            for techniques,techniques_info in techniques.items():
+                print(techniques," ",techniques_info)
+                #if endpoint_data['defined_http_verbs'] == 
+                
                 if techniques_info['condition']['uses_authorization'] == method_data['authorization_required']:
-                    pass
+                    if parameter_data and techniques_info['condition']['parameter_not_empty']: # If contain parameter
+                        pass
                 else:
                     return 
 
@@ -187,12 +231,17 @@ class TestBOLA:
     def attack_analyzer(self):
         annotate_API_specification = self.properties_analyzer() # 取得經由BOLA/IDOR_properites_analyzer標記過後的API規範檔
         for path,path_data in annotate_API_specification.items():
-            for path_data,path_data_key in path_data.items():
+            if 'endpoint_level_properties' in path_data:
                 endpoint_data = path_data['endpoint_level_properties']
-                parameter_data = path_data['parameter_level_properties']
+            else:
+                continue
+
+            for method in path_data.get('methods',[]):
                 method_data = path_data['method_level_properties']
-                if endpoint_data and parameter_data and method_data:
-                    self.check_condition(attack_vector_pattern,endpoint_data,parameter_data,method_data)
-                else:
-                    print('Not contain endpoint_data or parameter_data or method_data')
+                for parameter in method.get('parameters',[]):
+                    parameter_data = parameter['parameter_level_properties']
+                    if parameter_data and method_data:
+                        self.check_condition(attack_vector_pattern,endpoint_data,parameter_data,method_data)
+                    else:
+                        print('Not contain endpoint_data or parameter_data or method_data')
         
