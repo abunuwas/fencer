@@ -152,7 +152,7 @@ class TestBOLA:
             'Location':parameter_location,
             'type':item['schema']['type']
         }
-        item['Parameter-level-properties'] = parameter_level_properties
+        item['Parameter_level_properties'] = parameter_level_properties
         return item
     
     def annotate_with_operation_table2_properties(self,operation_dict,parameter):
@@ -231,17 +231,24 @@ class TestBOLA:
     def attack_analyzer(self):
         annotate_API_specification = self.properties_analyzer() # 取得經由BOLA/IDOR_properites_analyzer標記過後的API規範檔
         for path,path_data in annotate_API_specification.items():
-            if 'endpoint_level_properties' in path_data:
-                endpoint_data = path_data['endpoint_level_properties']
+            #print(path_data)
+            endpoint_data = path_data.get('endpoint_level_properties')
+            #method_data = path_data.get('method_level_properties')
+            #parameter_data = path_data.get('Parameter_level_properties')
+            if 'method_level_properties' in path_data:
+                method_data = path_data['method_level_properties']
+                print(method_data)
             else:
                 continue
 
-            for method in path_data.get('methods',[]):
-                method_data = path_data['method_level_properties']
-                for parameter in method.get('parameters',[]):
-                    parameter_data = parameter['parameter_level_properties']
-                    if parameter_data and method_data:
-                        self.check_condition(attack_vector_pattern,endpoint_data,parameter_data,method_data)
-                    else:
-                        print('Not contain endpoint_data or parameter_data or method_data')
-        
+            if 'Parameter_level_properties' in path_data:
+                parameter_data = path_data['Parameter_level_properties']
+                print(parameter_data)
+            else:
+                continue
+
+            #print(endpoint_data," ",method_data," ",parameter_data)
+            if endpoint_data and parameter_data and method_data:
+                self.check_condition(attack_vector_pattern,endpoint_data,parameter_data,method_data)
+            else:
+                print('Not contain endpoint_data or parameter_data or method_data')
