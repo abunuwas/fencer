@@ -22,7 +22,7 @@ attack_vector_pattern = {
                 'parameter_type':'integer',
                 'uses_authorization':True,
                 'parameter_not_empty':True,
-                'number_of_identifier':'Single'
+                'number_of_identifier/parameter':'Single'
             }
         },
         'with_prior_knowledge':
@@ -32,7 +32,7 @@ attack_vector_pattern = {
                 'parameter_type':'UUID',
                 'uses_authorization':True,
                 'parameter_not_empty':True,
-                'number_of_identifier':'Single'
+                'number_of_identifier/parameter':'Single'
             }
         },
         'Add/Change_file_extension':
@@ -42,7 +42,7 @@ attack_vector_pattern = {
                 'parameter_type':'string',
                 'uses_authorization':True,
                 'parameter_not_empty':True,
-                'number_of_identifier':'Single'
+                'number_of_identifier/parameter':'Single'
             }
         },
         'Wildcard(*,%)replacement/appending':
@@ -52,7 +52,7 @@ attack_vector_pattern = {
                 'parameter_type':'string',
                 'uses_authorization':True,
                 'parameter_not_empty':True,
-                'number_of_identifier':'Single'
+                'number_of_identifier/parameter':'Single'
             }
         },
         'ID_encoding/decoding':
@@ -61,7 +61,7 @@ attack_vector_pattern = {
             {
                 'uses_authorization':True,
                 'parameter_not_empty':True,
-                'number_of_identifier':'Single'
+                'number_of_identifier/parameter':'Single'
             }
         },
         'JSON(List)appending':
@@ -71,7 +71,7 @@ attack_vector_pattern = {
                 'parameter_type':'array',
                 'uses_authorization':True,
                 'parameter_not_empty':True,
-                'number_of_identifier':'Single'
+                'number_of_identifier/parameter':'Single'
             }
         }
     },
@@ -91,7 +91,9 @@ attack_vector_pattern = {
         {
             'condition':
             {
-
+                'Location_num':'Multiple', # If parameter have same name and location type is difference,then that location_num is multiple.
+                'uses_authorization':True,
+                'number_of_identifier/parameter':'Multiple'
             }
         }
     },
@@ -111,7 +113,7 @@ attack_vector_pattern = {
             'condition':
             {
                 'endpoint_properties_value':'All',
-                'number_of_identifier':'Single'
+                'number_of_identifier/parameter':'Single'
             }
         }
     }
@@ -187,12 +189,15 @@ class TestBOLA:
         }
         path_data['endpoint_level_properties'] = endpoint_level_properties
         return path_data
+    
+    def parameter_location_num(self):# If parameter have same name and location type is difference,then that location_num is multiple.
+        pass
 
     def check_condition(self,attack_vector_pattern,endpoint_data,parameter_data,method_data):
         for attack_vector,techniques in attack_vector_pattern.items(): # iterator key e.g(Enumeration,Authorization_token_manipulation,...)
-            print(attack_vector," ",techniques)
+            #print(attack_vector," ",techniques)
             for techniques,techniques_info in techniques.items():
-                print(techniques," ",techniques_info)
+                #print(techniques," ",techniques_info)
                 #if endpoint_data['defined_http_verbs'] == 
                 
                 if techniques_info['condition']['uses_authorization'] == method_data['authorization_required']:
@@ -231,24 +236,20 @@ class TestBOLA:
     def attack_analyzer(self):
         annotate_API_specification = self.properties_analyzer() # 取得經由BOLA/IDOR_properites_analyzer標記過後的API規範檔
         for path,path_data in annotate_API_specification.items():
-            #print(path_data)
             endpoint_data = path_data.get('endpoint_level_properties')
-            #method_data = path_data.get('method_level_properties')
-            #parameter_data = path_data.get('Parameter_level_properties')
-            if 'method_level_properties' in path_data:
-                method_data = path_data['method_level_properties']
-                print(method_data)
-            else:
-                continue
-
-            if 'Parameter_level_properties' in path_data:
-                parameter_data = path_data['Parameter_level_properties']
-                print(parameter_data)
-            else:
-                continue
-
-            #print(endpoint_data," ",method_data," ",parameter_data)
-            if endpoint_data and parameter_data and method_data:
-                self.check_condition(attack_vector_pattern,endpoint_data,parameter_data,method_data)
-            else:
-                print('Not contain endpoint_data or parameter_data or method_data')
+            for method in path_data:
+                if method in standard_http_methods:
+                    operation_dict = path_data[method]
+                if 'method_level_properties' in operation_dict:
+                    method_data = operation_dict['method_level_properties']
+                else:
+                    continue
+                if 'parameters' in operation_dict:
+                    for parameters in operation_dict['parameters']:
+                        parameter_data = parameters['Parameter_level_properties']
+                else:
+                    continue
+                if endpoint_data and parameter_data and method_data:
+                    self.check_condition(attack_vector_pattern,endpoint_data,parameter_data,method_data)
+                else:
+                    print('Not contain endpoint_data or parameter_data or method_data')
