@@ -194,17 +194,16 @@ class TestBOLA:
         pass
 
     def check_condition(self,attack_vector_pattern,endpoint_data,parameter_data,method_data):
+        attack_pattern = []
         for attack_vector,techniques in attack_vector_pattern.items(): # iterator key e.g(Enumeration,Authorization_token_manipulation,...)
-            #print(attack_vector," ",techniques)
             for techniques,techniques_info in techniques.items():
-                #print(techniques," ",techniques_info)
-                #if endpoint_data['defined_http_verbs'] == 
-                
-                if techniques_info['condition']['uses_authorization'] == method_data['authorization_required']:
+                if techniques_info['condition'].get('uses_authorization',False) and method_data.get('authorization_required',False):
                     if parameter_data and techniques_info['condition']['parameter_not_empty']: # If contain parameter
                         pass
-                else:
-                    return 
+                elif techniques_info['condition'].get('endpoint_properties_value',None) == endpoint_data.get('defined_http_verbs',None):
+                    attack_pattern.append(techniques_info)
+            print(attack_pattern)
+            return attack_pattern
 
     def properties_analyzer(self):
         annotated_paths = {}
