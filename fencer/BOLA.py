@@ -112,7 +112,7 @@ attack_vector_pattern = {
             'description':"Request's verb is changed to another verb that is notspecified in the endpoint's description.",
             'condition':
             {
-                'endpoint_properties_value':'All',
+                'endpoint_properties_value':'Not_All',
                 'number_of_identifier/parameter':'Single'
             }
         }
@@ -195,15 +195,15 @@ class TestBOLA:
 
     def check_condition(self,attack_vector_pattern,endpoint_data,parameter_data,method_data):
         attack_pattern = []
-        for attack_vector,techniques in attack_vector_pattern.items(): # iterator key e.g(Enumeration,Authorization_token_manipulation,...)
-            for techniques,techniques_info in techniques.items():
-                if techniques_info['condition'].get('uses_authorization',False) and method_data.get('authorization_required',False):
-                    if parameter_data and techniques_info['condition']['parameter_not_empty']: # If contain parameter
-                        pass
-                elif techniques_info['condition'].get('endpoint_properties_value',None) == endpoint_data.get('defined_http_verbs',None):
-                    attack_pattern.append(techniques_info)
-            print(attack_pattern)
-            return attack_pattern
+        for endpoint_key,endpoint_value in attack_vector_pattern['Endpoint_verb_tampering'].items():    
+            if endpoint_data['defined_http_verbs'] == 'Multiple' and endpoint_value['condition']['endpoint_properties_value'] == 'Multiple':
+                if method_data['authorization_required'] == endpoint_value['condition']['uses_authorization']:
+                    attack_pattern.append(endpoint_key)
+            elif endpoint_data['defined_http_verbs'] != 'All' and endpoint_value['condition']['endpoint_properties_value'] == 'Not_All':
+                if method_data['identifier_used'] == endpoint_value['condition']['number_of_identifier/parameter']:
+                    attack_pattern.append(endpoint_key)
+        print(attack_pattern)
+        return attack_pattern
 
     def properties_analyzer(self):
         annotated_paths = {}
@@ -236,6 +236,7 @@ class TestBOLA:
         annotate_API_specification = self.properties_analyzer() # 取得經由BOLA/IDOR_properites_analyzer標記過後的API規範檔
         for path,path_data in annotate_API_specification.items():
             endpoint_data = path_data.get('endpoint_level_properties')
+            #print(endpoint_data)
             for method in path_data:
                 if method in standard_http_methods:
                     operation_dict = path_data[method]
