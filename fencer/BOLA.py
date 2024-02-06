@@ -91,7 +91,7 @@ attack_vector_pattern = {
         {
             'condition':
             {
-                'Location_num':'Multiple', # If parameter have same name and location type is difference,then that location_num is multiple.
+                'Location_num':'Multiple', # If parameter have same name but location type is difference,then that location_num is multiple.
                 'uses_authorization':True,
                 'number_of_identifier/parameter':'Multiple'
             }
@@ -160,7 +160,7 @@ class TestBOLA:
     def annotate_with_operation_table2_properties(self,operation_dict,parameter):
        
         if self.is_identifier(parameter):
-            identified = 'single'
+            identified = 'Single'
         else:
             identified = 'Zero'
 
@@ -190,11 +190,24 @@ class TestBOLA:
         path_data['endpoint_level_properties'] = endpoint_level_properties
         return path_data
     
-    def parameter_location_num(self):# If parameter have same name and location type is difference,then that location_num is multiple.
-        pass
+    def parameter_location_num(self,operation_dict):# If parameter have same name and location type is difference,then that location_num is multiple.
+        seen_parameters = {}
+        location_num = 0
+        for parameter in operation_dict.get('parameters',[]):
+            parameter_name = parameter['name']
+            parameter_location = parameter['in']
+            #print(parameter_name," ",seen_parameters)
+            if parameter_name in seen_parameters:   
+                if seen_parameters[parameter_name] != parameter_location:
+                    location_num += 1
+            else:
+                print(parameter_name," ",parameter_location)
+                seen_parameters[parameter_name] = parameter_location
+        return location_num
 
     def check_condition(self,attack_vector_pattern,endpoint_data,parameter_data,method_data):
         attack_pattern = []
+        # check endpoint http method quantity
         for endpoint_key,endpoint_value in attack_vector_pattern['Endpoint_verb_tampering'].items():    
             if endpoint_data['defined_http_verbs'] == 'Multiple' and endpoint_value['condition']['endpoint_properties_value'] == 'Multiple':
                 if method_data['authorization_required'] == endpoint_value['condition']['uses_authorization']:
@@ -202,7 +215,17 @@ class TestBOLA:
             elif endpoint_data['defined_http_verbs'] != 'All' and endpoint_value['condition']['endpoint_properties_value'] == 'Not_All':
                 if method_data['identifier_used'] == endpoint_value['condition']['number_of_identifier/parameter']:
                     attack_pattern.append(endpoint_key)
-        print(attack_pattern)
+        # check endpoint_method_parameter uses authorization,or not?
+        for authorization_key,authorization_value in attack_vector_pattern['Authorization_token_manipulation'].items():
+            if method_data['authorization_required'] == authorization_value['condition']['uses_authorization']:
+                attack_pattern.append(authorization_key)
+
+        for parameter_key,parameter_value in attack_vector_pattern['Parameter_pollution'].items():
+            if method_data['authorization_required'] == parameter_value['condition']['uses_authorization'] and \
+               parameter_value['condition']['number_of_identifier/parameter'] == method_data['identifier_used'] and \
+               parameter_value['condition']['Location_num'] == parameter_data['location_nums']:
+                pass
+        #print(attack_pattern)
         return attack_pattern
 
     def properties_analyzer(self):
@@ -218,6 +241,7 @@ class TestBOLA:
                         if method in standard_http_methods: # 檢查path item是否有operation物件(GET、POST,etc)
                             count += 1
                             operation_dict = path_data[method]
+                            location_num = self.parameter_location_num(operation_dict)
                             if 'parameters' in operation_dict:
                                 for parameters in operation_dict['parameters']:
                                     self.annotate_with_operation_table2_properties(operation_dict,parameters)
@@ -236,7 +260,6 @@ class TestBOLA:
         annotate_API_specification = self.properties_analyzer() # 取得經由BOLA/IDOR_properites_analyzer標記過後的API規範檔
         for path,path_data in annotate_API_specification.items():
             endpoint_data = path_data.get('endpoint_level_properties')
-            #print(endpoint_data)
             for method in path_data:
                 if method in standard_http_methods:
                     operation_dict = path_data[method]
