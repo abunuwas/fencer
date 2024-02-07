@@ -201,7 +201,7 @@ class TestBOLA:
                 if seen_parameters[parameter_name] != parameter_location:
                     location_num += 1
             else:
-                print(parameter_name," ",parameter_location)
+                #print(parameter_name," ",parameter_location)
                 seen_parameters[parameter_name] = parameter_location
         return location_num
 
@@ -225,7 +225,19 @@ class TestBOLA:
                parameter_value['condition']['number_of_identifier/parameter'] == method_data['identifier_used'] and \
                parameter_value['condition']['Location_num'] == parameter_data['location_nums']:
                 pass
-        #print(attack_pattern)
+        
+        for enumeration_key,enumeration_value in attack_vector_pattern['Enumeration'].items():
+            parameter_type = enumeration_value['condition'].get('parameter_type')
+            if method_data['authorization_required'] == enumeration_value['condition']['uses_authorization'] and \
+               (parameter_data and enumeration_value['condition']['parameter_not_empty']) and \
+                method_data['identifier_used'] == enumeration_value['condition']['number_of_identifier/parameter']:
+                    if parameter_type == 'integer' or parameter_type == 'array' or parameter_type == 'string' or parameter_type == 'UUID':
+                        attack_pattern.append(enumeration_key)
+                    elif parameter_type == None:
+                        attack_pattern.append(enumeration_key)
+            else:
+                continue
+        print(attack_pattern)
         return attack_pattern
 
     def properties_analyzer(self):
