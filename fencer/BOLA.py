@@ -231,7 +231,7 @@ class TestBOLA:
             if method_data['authorization_required'] == enumeration_value['condition']['uses_authorization'] and \
                (parameter_data and enumeration_value['condition']['parameter_not_empty']) and \
                 method_data['identifier_used'] == enumeration_value['condition']['number_of_identifier/parameter']:
-                    if parameter_type == 'integer' or parameter_type == 'array' or parameter_type == 'string' or parameter_type == 'UUID':
+                    if parameter_type == parameter_data['type']:
                         attack_pattern.append(enumeration_key)
                     elif parameter_type == None:
                         attack_pattern.append(enumeration_key)
