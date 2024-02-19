@@ -9,6 +9,7 @@ from .authorized_endpoints import TestAuthEndpoints
 from .sql_injection import SQLInjectionTestRunner
 from .test_case import AttackStrategy, TestCase, VulnerabilitySeverityLevel, TestReporter
 from .mass_assignment import TestMAEndpoints
+from .xss_injection import XSSInjectionTestRunner
 
 class TestRunner:
     def __init__(self, api_spec: APISpec):
@@ -87,3 +88,43 @@ class TestRunner:
 
     def run_insecure_design_attacks(self):
         pass
+    def run_xss_injection_attacks(self):
+        xss_injection_test_runner = XSSInjectionTestRunner(api_spec=self.api_spec)
+
+        failing_tests: list[TestCase] = []
+
+        sql_injection_through_query_params_msg = """
+  > Testing XSS injection through URL query parameters
+          """
+        sql_injection_through_path_params_msg = """
+  > Testing XSS injection through URL path parameters
+          """
+        sql_injection_through_request_payloads_msg = """
+  > Testing XSS injection through request payloads
+          """
+
+        click.echo(sql_injection_through_query_params_msg)
+        failing_query_params_tests = xss_injection_test_runner.run_xss_injection_through_query_parameters()
+
+        click.echo(sql_injection_through_path_params_msg)
+        failing_path_params_tests = xss_injection_test_runner.run_xss_injection_through_path_parameters()
+
+        click.echo(sql_injection_through_request_payloads_msg)
+        failing_payload_tests = xss_injection_test_runner.run_xss_injection_through_request_payloads()
+
+        failing_tests += failing_query_params_tests + failing_path_params_tests + failing_payload_tests
+
+        self.reports.append(TestReporter(
+            category=AttackStrategy.INJECTION,
+            number_tests=xss_injection_test_runner.injection_tests,
+            failing_tests=len(failing_tests),
+            low_severity=sum(1 for test in failing_tests if test.severity == VulnerabilitySeverityLevel.LOW),
+            medium_severity=sum(1 for test in failing_tests if test.severity == VulnerabilitySeverityLevel.MEDIUM),
+            high_severity=sum(1 for test in failing_tests if test.severity == VulnerabilitySeverityLevel.HIGH),
+        ))
+
+        failed_tests_file = Path('.fencer/injection_attacks.json')
+        failed_tests_file.write_text(
+            json.dumps([test.dict() for test in failing_tests], indent=4)
+        )
+    
