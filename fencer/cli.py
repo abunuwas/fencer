@@ -57,7 +57,7 @@ def run(oas_file, base_url):
         Testing BOLA
   -------------------------"""
     click.echo(injection_message)
-    test_runner.run_BOLA_test()
+    test_runner.run_BOLA_attacks()
 
     injection_message = """
   -------------------------
