@@ -342,4 +342,5 @@ class TestBOLA:
                         print('Not contain endpoint_data or parameter_data or method_data')
                 else:
                     continue
-        print(All_endpoint_attack_pattern)
+        
+        return All_endpoint_attack_pattern
