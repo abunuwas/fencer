@@ -71,10 +71,12 @@ class TestRunner:
             json.dumps([test.dict() for test in failing_tests], indent=4)
         )
         
-    def run_BOLA_test(self):
+    def run_BOLA_attacks(self):
         test_runner = TestBOLA(api_spec=self.api_spec)
-        #test_runner.properties_analyzer()
-        test_runner.attack_analyzer()
+        failing_tests = test_runner.attack_analyzer()
+        failed_tests_file = Path('.fencer/Broken_Object_Level_Authorization_attacks.json')
+        with failed_tests_file.open('w', encoding='utf-8') as file:
+            json.dump(failing_tests, file, ensure_ascii=False, indent=4)
 
     def run_surface_attacks(self):
         pass
