@@ -61,9 +61,11 @@ def run(oas_file, base_url):
 
     injection_message = """
   -------------------------
-    Testing Mass Assignment
+    Testing XSS injection
   -------------------------"""
     click.echo(injection_message)
+    test_runner.run_xss_injection_attacks()
+
     click.echo()
     
     click.echo(click.style("  SUMMARY", fg="green"))
