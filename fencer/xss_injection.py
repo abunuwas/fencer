@@ -10,7 +10,8 @@ from .api_spec import Endpoint, fake_parameter, APISpec
 from .test_case import TestResult, TestCase, AttackStrategy, TestDescription, HTTPMethods, VulnerabilitySeverityLevel
 
 xss_injection_strategies = [
-    " <h1 style=\"color: red;\">xss attack</h1>",
+    "<h1 style=\"color: red;\">xss attack</h1>",
+    "<script>alter(1)</scripe>"
 ]
 
 
@@ -149,9 +150,10 @@ class InjectionTestCaseRunner:
         self.response = None
 
     def run(self):
+        headers = {"Authorization": f"Bearer eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJ0d2x5ODgxMzlAZ21haWwuY29tIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3MDgzMjMzMjQsImV4cCI6MTcwODkyODEyNH0.bi_zkpwXzxQXFRzruMm7DsTJ5bTZ0m2UHm4xGKMRYDqUgKS4y_4iWzQ6J-kiF713z7VQ0OeQ6aEet2jhgGXsUGpL3E5jfEw_gKC9UN1b71xivebZusVroZtp1_rgBUv70FmJjkm1sXPehc3RrpApijeQ99DeaNsobXnG9ABhzjj3-c7k9pto16Ymzjq4YbjvAv4NYwzwdQnN2GaJW_zTC82UfWB-8PoS1zO7RKo6oEGO9NiSGdKEEwmQYGLeVgpg2Fvz2rOImK-ZlnhNLD0v--uUSGEocmIx7HIGTETR4PBiErtUO-8tjZCSQx2g4gmduKmY4aCgSv7jnzk5oeGB5g"}
         callable_ = getattr(requests, self.test_case.description.http_method.value.lower())
         self.response = callable_(
-            self.test_case.description.url, json=self.test_case.description.payload
+            self.test_case.description.url, json=self.test_case.description.payload, headers=headers
         )
         self.resolve_test_result()
 
@@ -163,7 +165,7 @@ class InjectionTestCaseRunner:
         - 500 status code indicates potential high severity and potential for leaking traceback
         Everything else is severity Zero.
         Until we can develop better heuristics for response analysis, this is the best we can do.
-        """
+        
         # If the server fails to respond, we assume we broke it
         if self.response is None:
             self.test_case.result = TestResult.FAIL
@@ -178,9 +180,28 @@ class InjectionTestCaseRunner:
             self.test_case.result = TestResult.SUCCESS
             self.test_case.severity = VulnerabilitySeverityLevel.ZERO
         self.test_case.ended_test()
+""" 
+        
+        #if any(mess in self.response.text for mess in xss_injection_strategies):
+        #    self.test_case.result = TestResult.FAIL
+        #    self.test_case.severity = VulnerabilitySeverityLevel.HIGH
+        mes = []
+        for s in self.response.text:
+            mes.append(s)
+        str1 = "".join(mes)
+        click.echo(str1) 
+        
+        for substr in xss_injection_strategies:
+            if str1.find(substr) != -1 :
+                self.test_case.result = TestResult.FAIL
+                self.test_case.severity = VulnerabilitySeverityLevel.HIGH
+                break
+            else:
+                self.test_case.result = TestResult.SUCCESS
+                self.test_case.severity = VulnerabilitySeverityLevel.ZERO
+        self.test_case.ended_test()
 
-
-class XSSInjectionTestRunner:
+class XSSInjectionTestRunner:   
     def __init__(self, api_spec: APISpec):
         self.api_spec = api_spec
         self.injection_tests = 0
