@@ -5,6 +5,7 @@ import click
 
 from .api_spec import APISpec
 from .BOLA import TestBOLA
+from .BFLA import TestBFLA
 from .authorized_endpoints import TestAuthEndpoints
 from .sql_injection import SQLInjectionTestRunner
 from .test_case import AttackStrategy, TestCase, VulnerabilitySeverityLevel, TestReporter
@@ -78,9 +79,13 @@ class TestRunner:
         failed_tests_file = Path('.fencer/Broken_Object_Level_Authorization_attacks.json')
         with failed_tests_file.open('w', encoding='utf-8') as file:
             json.dump(failing_tests, file, ensure_ascii=False, indent=4)
+
     def run_BFLA_attacks(self):
-        pass
-    
+        test_runner = TestBFLA(api_spec=self.api_spec)
+        failing_tests = test_runner.test_BFLA_attack()
+        print(failing_tests)
+        failed_tests_file = Path('.fencer/Broken_Function_Level_Authorization_attacks.json')
+
     def run_surface_attacks(self):
         pass
 
