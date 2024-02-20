@@ -51,27 +51,6 @@ def run(oas_file, base_url):
   -------------------------"""
     click.echo(injection_message)
     test_runner.run_xss_injection_attacks()
-
-    click.echo()
-    
-    click.echo(click.style("  SUMMARY", fg="green"))
-
-    click.echo()
-    click.echo(click.style("> Number of tests", fg="yellow"))
-    click.echo(tabulate({
-        "Test Category": [report.category.value for report in test_runner.reports],
-        "Number of tests": [report.number_tests for report in test_runner.reports],
-        "Failing tests": [report.failing_tests for report in test_runner.reports]
-    }, tablefmt="fancy_grid", headers=["Test category", "Number of tests", "Failing tests"]))
-
-    click.echo()
-    click.echo(click.style("> Vulnerabilities found by severity", fg="red"))
-    click.echo(tabulate({
-        "Test category": [report.category.value for report in test_runner.reports],
-        "Low": [report.low_severity for report in test_runner.reports],
-        "Medium": [report.medium_severity for report in test_runner.reports],
-        "High": [report.high_severity for report in test_runner.reports],
-    }, tablefmt="fancy_grid", headers=["Test category", "Low", "Medium", "High"]))
   #Unauthorized access
     injection_message = """
   -------------------------
@@ -93,6 +72,28 @@ def run(oas_file, base_url):
   -------------------------"""
     click.echo(injection_message)
     test_runner.run_BFLA_attacks()
+
+    click.echo()
+    
+    click.echo(click.style("  SUMMARY", fg="green"))
+
+    click.echo()
+    click.echo(click.style("> Number of tests", fg="yellow"))
+    click.echo(tabulate({
+        "Test Category": [report.category.value for report in test_runner.reports],
+        "Number of tests": [report.number_tests for report in test_runner.reports],
+        "Failing tests": [report.failing_tests for report in test_runner.reports]
+    }, tablefmt="fancy_grid", headers=["Test category", "Number of tests", "Failing tests"]))
+
+    click.echo()
+    click.echo(click.style("> Vulnerabilities found by severity", fg="red"))
+    click.echo(tabulate({
+        "Test category": [report.category.value for report in test_runner.reports],
+        "Low": [report.low_severity for report in test_runner.reports],
+        "Medium": [report.medium_severity for report in test_runner.reports],
+        "High": [report.high_severity for report in test_runner.reports],
+    }, tablefmt="fancy_grid", headers=["Test category", "Low", "Medium", "High"]))
+
 
 
 
