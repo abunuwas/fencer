@@ -37,28 +37,14 @@ def run(oas_file, base_url):
     Path('.fencer').mkdir(exist_ok=True)
 
     test_runner = TestRunner(api_spec=api_spec)
-    #SQl injection
+  #SQl injection
     injection_message = """
   -------------------------
   Testing injection attacks
   -------------------------"""
     click.echo(injection_message)
     test_runner.run_sql_injection_attacks()
-
-    injection_message = """
-  -------------------------
-  Testing unauthorized access
-  -------------------------"""
-    click.echo(injection_message)
-    test_runner.run_unauthorized_access_attacks()
-
-    injection_message = """
-  -------------------------
-        Testing BOLA
-  -------------------------"""
-    click.echo(injection_message)
-    test_runner.run_BOLA_attacks()
-
+  #XSS injection
     injection_message = """
   -------------------------
     Testing XSS injection
@@ -86,6 +72,28 @@ def run(oas_file, base_url):
         "Medium": [report.medium_severity for report in test_runner.reports],
         "High": [report.high_severity for report in test_runner.reports],
     }, tablefmt="fancy_grid", headers=["Test category", "Low", "Medium", "High"]))
+  #Unauthorized access
+    injection_message = """
+  -------------------------
+  Testing unauthorized access
+  -------------------------"""
+    click.echo(injection_message)
+    test_runner.run_unauthorized_access_attacks()
+  #BOLA attacks
+    injection_message = """
+  -------------------------
+        Testing BOLA
+  -------------------------"""
+    click.echo(injection_message)
+    test_runner.run_BOLA_attacks()
+  #BFLA attacks
+    injection_message = """
+  -------------------------
+        Testing BFLA
+  -------------------------"""
+    click.echo(injection_message)
+    test_runner.run_BFLA_attacks()
+
 
 
 if __name__ == "__main__":
