@@ -27,6 +27,7 @@ class AttackStrategy(Enum):
     MASS_ASSIGNMENT = "mass_assignment"
     INSECURE_DESIGN = "insecure_design"
     BOLA = "BOLA"
+    BFLA = "BFLA"
 
 
 class TestResult(Enum):
