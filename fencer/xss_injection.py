@@ -189,7 +189,7 @@ class InjectionTestCaseRunner:
         for s in self.response.text:
             mes.append(s)
         str1 = "".join(mes)
-        click.echo(str1) 
+        #click.echo(str1) 
         
         for substr in xss_injection_strategies:
             if str1.find(substr) != -1 :
