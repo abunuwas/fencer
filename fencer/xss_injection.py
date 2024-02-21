@@ -217,7 +217,7 @@ class XSSInjectionTestRunner:
                 self.injection_tests += 1
                 test_case = InjectionTestCaseRunner(
                     test_case=TestCase(
-                        category=AttackStrategy.INJECTION,
+                        category=AttackStrategy.XSS_INJECTION,
                         test_target="xss_injection__optional_query_parameters",
                         description=TestDescription(
                             http_method=getattr(HTTPMethods, endpoint.method.upper()),
@@ -248,7 +248,7 @@ class XSSInjectionTestRunner:
                 self.injection_tests += 1
                 test_case = InjectionTestCaseRunner(
                     test_case=TestCase(
-                        category=AttackStrategy.INJECTION,
+                        category=AttackStrategy.XSS_INJECTION,
                         test_target="xss_injection__optional_query_parameters",
                         description=TestDescription(
                             http_method=getattr(HTTPMethods, endpoint.method.upper()),
@@ -277,7 +277,7 @@ class XSSInjectionTestRunner:
             self.injection_tests += 1
             test_case = InjectionTestCaseRunner(
                 test_case=TestCase(
-                    category=AttackStrategy.INJECTION,
+                    category=AttackStrategy.XSS_INJECTION,
                     test_target="xss_injection__optional_query_parameters",
                     description=TestDescription(
                         http_method=getattr(HTTPMethods, endpoint.method.upper()),
