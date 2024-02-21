@@ -159,12 +159,17 @@ class InjectionTestCaseRunner:
         self.response = None
 
     def run(self):
-        headers = {"Authorization": f"Bearer eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJ0d2x5ODgxMzlAZ21haWwuY29tIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3MDgzMjMzMjQsImV4cCI6MTcwODkyODEyNH0.bi_zkpwXzxQXFRzruMm7DsTJ5bTZ0m2UHm4xGKMRYDqUgKS4y_4iWzQ6J-kiF713z7VQ0OeQ6aEet2jhgGXsUGpL3E5jfEw_gKC9UN1b71xivebZusVroZtp1_rgBUv70FmJjkm1sXPehc3RrpApijeQ99DeaNsobXnG9ABhzjj3-c7k9pto16Ymzjq4YbjvAv4NYwzwdQnN2GaJW_zTC82UfWB-8PoS1zO7RKo6oEGO9NiSGdKEEwmQYGLeVgpg2Fvz2rOImK-ZlnhNLD0v--uUSGEocmIx7HIGTETR4PBiErtUO-8tjZCSQx2g4gmduKmY4aCgSv7jnzk5oeGB5g"}
-        callable_ = getattr(requests, self.test_case.description.http_method.value.lower())
-        self.response = callable_(
-            self.test_case.description.url, json=self.test_case.description.payload, headers=headers
-        )
-        self.resolve_test_result()
+        try:
+            headers = {"Authorization": f"Bearer eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJ0d2x5ODgxMzlAZ21haWwuY29tIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3MDgzMjMzMjQsImV4cCI6MTcwODkyODEyNH0.bi_zkpwXzxQXFRzruMm7DsTJ5bTZ0m2UHm4xGKMRYDqUgKS4y_4iWzQ6J-kiF713z7VQ0OeQ6aEet2jhgGXsUGpL3E5jfEw_gKC9UN1b71xivebZusVroZtp1_rgBUv70FmJjkm1sXPehc3RrpApijeQ99DeaNsobXnG9ABhzjj3-c7k9pto16Ymzjq4YbjvAv4NYwzwdQnN2GaJW_zTC82UfWB-8PoS1zO7RKo6oEGO9NiSGdKEEwmQYGLeVgpg2Fvz2rOImK-ZlnhNLD0v--uUSGEocmIx7HIGTETR4PBiErtUO-8tjZCSQx2g4gmduKmY4aCgSv7jnzk5oeGB5g"}
+            callable_ = getattr(requests, self.test_case.description.http_method.value.lower())
+            self.response = callable_(
+                self.test_case.description.url, json=self.test_case.description.payload, headers=headers
+            )
+            self.resolve_test_result()
+        except requests.exceptions.ConnectionError:
+            self.test_case.result = TestResult.FAIL
+            self.test_case.severity = VulnerabilitySeverityLevel.HIGH
+            self.test_case.ended_test()
 
     def resolve_test_result(self):
         """
@@ -201,9 +206,16 @@ class InjectionTestCaseRunner:
         #click.echo(str1) 
         
         for substr in xss_injection_strategies:
-            if str1.find(substr) != -1 :
+            if str1.find(substr) != -1 and  200 <=self.response.status_code <300:  
                 self.test_case.result = TestResult.FAIL
                 self.test_case.severity = VulnerabilitySeverityLevel.HIGH
+                break
+            elif self.response.status_code >= 500:
+                self.test_case.result = TestResult.FAIL
+                self.test_case.severity = VulnerabilitySeverityLevel.HIGH
+            elif str1.find(substr) != -1:
+                self.test_case.result = TestResult.FAIL
+                self.test_case.severity = VulnerabilitySeverityLevel.LOW
                 break
             else:
                 self.test_case.result = TestResult.SUCCESS
