@@ -83,8 +83,18 @@ class TestRunner:
     def run_BFLA_attacks(self):
         test_runner = TestBFLA(api_spec=self.api_spec)
         failing_tests = test_runner.test_BFLA_attack()
-        print(failing_tests)
+        self.reports.append(TestReporter(
+            category=AttackStrategy.BFLA,
+            number_tests=test_runner.auth_tests,
+            failing_tests=len(failing_tests),
+            low_severity=sum(1 for test in failing_tests if test.severity == VulnerabilitySeverityLevel.LOW),
+            medium_severity=sum(1 for test in failing_tests if test.severity == VulnerabilitySeverityLevel.MEDIUM),
+            high_severity=sum(1 for test in failing_tests if test.severity == VulnerabilitySeverityLevel.HIGH),
+        ))
         failed_tests_file = Path('.fencer/Broken_Function_Level_Authorization_attacks.json')
+        failed_tests_file.write_text(
+            json.dumps([test.dict() for test in failing_tests], indent=4)
+        )
         
     def run_surface_attacks(self):
         pass
