@@ -11,7 +11,16 @@ from .test_case import TestResult, TestCase, AttackStrategy, TestDescription, HT
 
 xss_injection_strategies = [
     "<h1 style=\"color: red;\">xss attack</h1>",
-    "<script>alter(1)</scripe>"
+    "<script>alter(1)</scripe>",
+    "<image/src/onerror=prompt(8)>",
+    "<img/src/onerror=prompt(8)>",
+    "<image src/onerror=prompt(8)>",
+    "<img src/onerror=prompt(8)>",
+    "<image src =q onerror=prompt(8)>",
+    "<img src =q onerror=prompt(8)>",
+    "</scrip</script>t><img src =q onerror=prompt(8)>",
+    
+
 ]
 
 
