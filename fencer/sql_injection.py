@@ -161,12 +161,15 @@ class InjectionTestCaseRunner:
         self.response = None
 
     def run(self):
-        callable_ = getattr(requests, self.test_case.description.http_method.value.lower())
-        self.response = callable_(
-            self.test_case.description.url, json=self.test_case.description.payload
-        )
-        self.resolve_test_result()
-
+        try:
+            callable_ = getattr(requests, self.test_case.description.http_method.value.lower())
+            self.response = callable_(
+                self.test_case.description.url, json=self.test_case.description.payload
+            )
+            self.resolve_test_result()
+        except requests.exceptions.ConnectionError:
+            self.response = None
+            self.resolve_test_result()
     def resolve_test_result(self):
         """
         In this case, it's difficult to assess the severity of the failure without looking
