@@ -26,6 +26,7 @@ class AttackStrategy(Enum):
     SURFACE_ATTACKS = "surface_attacks"
     MASS_ASSIGNMENT = "mass_assignment"
     INSECURE_DESIGN = "insecure_design"
+    XSS_INJECTION = "xss_injection"
     BOLA = "BOLA"
     BFLA = "BFLA"
 
