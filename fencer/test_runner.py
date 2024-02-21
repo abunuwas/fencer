@@ -85,7 +85,7 @@ class TestRunner:
         failing_tests = test_runner.test_BFLA_attack()
         print(failing_tests)
         failed_tests_file = Path('.fencer/Broken_Function_Level_Authorization_attacks.json')
-
+        
     def run_surface_attacks(self):
         pass
 
@@ -122,7 +122,7 @@ class TestRunner:
         failing_tests += failing_query_params_tests + failing_path_params_tests + failing_payload_tests
 
         self.reports.append(TestReporter(
-            category=AttackStrategy.INJECTION,
+            category=AttackStrategy.XSS_INJECTION,
             number_tests=xss_injection_test_runner.injection_tests,
             failing_tests=len(failing_tests),
             low_severity=sum(1 for test in failing_tests if test.severity == VulnerabilitySeverityLevel.LOW),
@@ -130,7 +130,7 @@ class TestRunner:
             high_severity=sum(1 for test in failing_tests if test.severity == VulnerabilitySeverityLevel.HIGH),
         ))
 
-        failed_tests_file = Path('.fencer/injection_attacks.json')
+        failed_tests_file = Path('.fencer/xss_injection_attacks.json')
         failed_tests_file.write_text(
             json.dumps([test.dict() for test in failing_tests], indent=4)
         )
