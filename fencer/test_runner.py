@@ -82,7 +82,7 @@ class TestRunner:
 
     def run_BFLA_attacks(self):
         test_runner = TestBFLA(api_spec=self.api_spec)
-        failing_tests = test_runner.test_BFLA_attack()
+        failing_tests = test_runner.run_BFLA_attack_through_path_parameters()
         self.reports.append(TestReporter(
             category=AttackStrategy.BFLA,
             number_tests=test_runner.auth_tests,
