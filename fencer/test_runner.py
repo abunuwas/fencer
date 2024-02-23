@@ -82,7 +82,21 @@ class TestRunner:
 
     def run_BFLA_attacks(self):
         test_runner = TestBFLA(api_spec=self.api_spec)
-        failing_tests = test_runner.run_BFLA_attack_through_path_parameters()
+        failing_tests: list[TestCase] = []
+        
+        BFLA_attack_through_path_params_msg = """
+    > Testing BFLA attack through URL path parameters
+            """
+        BFLA_attack_through_request_payloads_msg = """
+    > Testing BFLA attack through request payloads
+            """
+        click.echo(BFLA_attack_through_path_params_msg)
+        failing_path_params_tests = test_runner.run_BFLA_attack_through_path_parameters()
+
+        click.echo(BFLA_attack_through_request_payloads_msg)
+        failing_payload_tests = test_runner.run_BFLA_attack_through_request_payloads()
+        
+        failing_tests += failing_path_params_tests + failing_payload_tests
         self.reports.append(TestReporter(
             category=AttackStrategy.BFLA,
             number_tests=test_runner.auth_tests,
@@ -110,23 +124,23 @@ class TestRunner:
 
         failing_tests: list[TestCase] = []
 
-        sql_injection_through_query_params_msg = """
+        xss_injection_through_query_params_msg = """
   > Testing XSS injection through URL query parameters
           """
-        sql_injection_through_path_params_msg = """
+        xss_injection_through_path_params_msg = """
   > Testing XSS injection through URL path parameters
           """
-        sql_injection_through_request_payloads_msg = """
+        xss_injection_through_request_payloads_msg = """
   > Testing XSS injection through request payloads
           """
 
-        click.echo(sql_injection_through_query_params_msg)
+        click.echo(xss_injection_through_query_params_msg)
         failing_query_params_tests = xss_injection_test_runner.run_xss_injection_through_query_parameters()
 
-        click.echo(sql_injection_through_path_params_msg)
+        click.echo(xss_injection_through_path_params_msg)
         failing_path_params_tests = xss_injection_test_runner.run_xss_injection_through_path_parameters()
 
-        click.echo(sql_injection_through_request_payloads_msg)
+        click.echo(xss_injection_through_request_payloads_msg)
         failing_payload_tests = xss_injection_test_runner.run_xss_injection_through_request_payloads()
 
         failing_tests += failing_query_params_tests + failing_path_params_tests + failing_payload_tests
