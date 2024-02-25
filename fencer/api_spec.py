@@ -55,10 +55,14 @@ def fake_parameter(schema):
             return 'test@example.com'
         if schema['format'] == 'ipv4':
             return '127.0.0.1'
-
+    """
     if schema['type'] == 'integer':
         ranges = NumberRanges(schema)
         return random.randint(ranges.minimum, ranges.maximum)
+    """
+    if schema['type'] == 'integer':
+        return random.randint(1,100)
+
     if schema['type'] == 'number':
         if 'format' not in schema:
             ranges = NumberRanges(schema)
