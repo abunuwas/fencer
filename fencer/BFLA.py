@@ -33,11 +33,15 @@ class BFLAEndpoint:
         self.fake_payload_strategy = (
             self.fake_payload_strategy or JSF
         )
+        
     def create_fake_parameter_with_path_position(self):
         urls = []
         for param in self.endpoint.path.path_params_list:
-            #print(" ",param)
-            path = self.endpoint.path.path.replace(f'{{{param}}}')
+            for param_scheams in self.endpoint.path.path_params_schemas:
+                print(self.fake_param_strategy(param_scheams['schema']))
+                path = self.endpoint.path.path.replace(f'{{{param}}}', str(self.fake_param_strategy(param_scheams['schema'])))
+                urls.append(self.endpoint.base_url + path)
+        return urls
 
     def gets_url_with_test_path_params(self):
         urls = []
@@ -94,6 +98,7 @@ class TestBFLA:
             if not endpoint.has_path_params():
                 continue
             BFLA_attack = BFLAEndpoint(endpoint)
+            #print(BFLA_attack.fake_param_strategy)
             endpoint_failing_tests = []
             click.echo(f"    {endpoint.method.upper()} {endpoint.base_url + endpoint.path.path}", nl=False)
             for url in BFLA_attack.gets_url_with_test_path_params():
