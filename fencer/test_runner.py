@@ -44,7 +44,7 @@ class TestRunner:
         failing_tests += failing_query_params_tests + failing_path_params_tests + failing_payload_tests
 
         self.reports.append(TestReporter(
-            category=AttackStrategy.INJECTION,
+            category=AttackStrategy.SQL_INJECTION,
             number_tests=sql_injection_test_runner.injection_tests,
             failing_tests=len(failing_tests),
             low_severity=sum(1 for test in failing_tests if test.severity == VulnerabilitySeverityLevel.LOW),
