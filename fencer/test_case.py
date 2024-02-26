@@ -21,7 +21,7 @@ test_case_example = {
 
 
 class AttackStrategy(Enum):
-    INJECTION = "injection"
+    SQL_INJECTION = "sql_injection"
     UNAUTHORIZED_ACCESS = "unauthorized_access"
     SURFACE_ATTACKS = "surface_attacks"
     MASS_ASSIGNMENT = "mass_assignment"
