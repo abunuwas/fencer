@@ -211,7 +211,7 @@ class SQLInjectionTestRunner:
                 self.injection_tests += 1
                 test_case = InjectionTestCaseRunner(
                     test_case=TestCase(
-                        category=AttackStrategy.INJECTION,
+                        category=AttackStrategy.SQL_INJECTION,
                         test_target="sql_injection__optional_query_parameters",
                         description=TestDescription(
                             http_method=getattr(HTTPMethods, endpoint.method.upper()),
@@ -242,7 +242,7 @@ class SQLInjectionTestRunner:
                 self.injection_tests += 1
                 test_case = InjectionTestCaseRunner(
                     test_case=TestCase(
-                        category=AttackStrategy.INJECTION,
+                        category=AttackStrategy.SQL_INJECTION,
                         test_target="sql_injection__optional_query_parameters",
                         description=TestDescription(
                             http_method=getattr(HTTPMethods, endpoint.method.upper()),
@@ -271,7 +271,7 @@ class SQLInjectionTestRunner:
             self.injection_tests += 1
             test_case = InjectionTestCaseRunner(
                 test_case=TestCase(
-                    category=AttackStrategy.INJECTION,
+                    category=AttackStrategy.SQL_INJECTION,
                     test_target="sql_injection__optional_query_parameters",
                     description=TestDescription(
                         http_method=getattr(HTTPMethods, endpoint.method.upper()),
