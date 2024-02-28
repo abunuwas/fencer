@@ -32,7 +32,7 @@ class UnauthorizedAccessTestCaseRunner:
             self.test_case.result = TestResult.SUCCESS
             self.test_case.severity = VulnerabilitySeverityLevel.ZERO
         # If the response status code is in the 2xx status code group, it's pretty bad
-        elif self.response.status_code >= 200 < 300:
+        elif 200 <= self.response.status_code < 300:
             self.test_case.result = TestResult.FAIL
             self.test_case.severity = VulnerabilitySeverityLevel.HIGH
         # In all other cases, the response isn't successful, but it's still
