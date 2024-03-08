@@ -9,6 +9,8 @@ from jsf import JSF
 from .api_spec import Endpoint, fake_parameter, APISpec
 from .test_case import TestResult, TestCase, AttackStrategy, TestDescription, HTTPMethods, VulnerabilitySeverityLevel
 
+AUTHORIZED_TOKEN = "eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJ0d2x5ODgxMzlAZ21haWwuY29tIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3MDgzMjMzMjQsImV4cCI6MTcwODkyODEyNH0.bi_zkpwXzxQXFRzruMm7DsTJ5bTZ0m2UHm4xGKMRYDqUgKS4y_4iWzQ6J-kiF713z7VQ0OeQ6aEet2jhgGXsUGpL3E5jfEw_gKC9UN1b71xivebZusVroZtp1_rgBUv70FmJjkm1sXPehc3RrpApijeQ99DeaNsobXnG9ABhzjj3-c7k9pto16Ymzjq4YbjvAv4NYwzwdQnN2GaJW_zTC82UfWB-8PoS1zO7RKo6oEGO9NiSGdKEEwmQYGLeVgpg2Fvz2rOImK-ZlnhNLD0v--uUSGEocmIx7HIGTETR4PBiErtUO-8tjZCSQx2g4gmduKmY4aCgSv7jnzk5oeGB5g"
+
 xss_injection_strategies = [
     "<h1 style=\"color: red;\">xss attack</h1>",
     "<script>alter(1)</scripe>",
@@ -158,8 +160,9 @@ class InjectionTestCaseRunner:
         self.test_case = test_case
         self.response = None
 
-    def run(self):
+    def run(self,token):
         try:
+            headers = {'Authorization': f'Bearer {token}'}
             headers = {"Authorization": f"Bearer eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJ0d2x5ODgxMzlAZ21haWwuY29tIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3MDgzMjMzMjQsImV4cCI6MTcwODkyODEyNH0.bi_zkpwXzxQXFRzruMm7DsTJ5bTZ0m2UHm4xGKMRYDqUgKS4y_4iWzQ6J-kiF713z7VQ0OeQ6aEet2jhgGXsUGpL3E5jfEw_gKC9UN1b71xivebZusVroZtp1_rgBUv70FmJjkm1sXPehc3RrpApijeQ99DeaNsobXnG9ABhzjj3-c7k9pto16Ymzjq4YbjvAv4NYwzwdQnN2GaJW_zTC82UfWB-8PoS1zO7RKo6oEGO9NiSGdKEEwmQYGLeVgpg2Fvz2rOImK-ZlnhNLD0v--uUSGEocmIx7HIGTETR4PBiErtUO-8tjZCSQx2g4gmduKmY4aCgSv7jnzk5oeGB5g"}
             callable_ = getattr(requests, self.test_case.description.http_method.value.lower())
             self.response = callable_(
@@ -169,6 +172,7 @@ class InjectionTestCaseRunner:
         except requests.exceptions.ConnectionError:
             self.test_case.result = TestResult.FAIL
             self.test_case.severity = VulnerabilitySeverityLevel.HIGH
+            click.echo('123')
             self.test_case.ended_test()
 
     def resolve_test_result(self):
@@ -247,7 +251,7 @@ class XSSInjectionTestRunner:
                         )
                     )
                 )
-                test_case.run()
+                test_case.run(AUTHORIZED_TOKEN)
                 if test_case.test_case.result == TestResult.FAIL:
                     endpoint_failing_tests.append(test_case.test_case)
             if len(endpoint_failing_tests) > 0:
@@ -278,7 +282,7 @@ class XSSInjectionTestRunner:
                         )
                     )
                 )
-                test_case.run()
+                test_case.run(AUTHORIZED_TOKEN)
                 if test_case.test_case.result == TestResult.FAIL:
                     endpoint_failing_tests.append(test_case.test_case)
             if len(endpoint_failing_tests) > 0:
@@ -307,7 +311,7 @@ class XSSInjectionTestRunner:
                     )
                 )
             )
-            test_case.run()
+            test_case.run(AUTHORIZED_TOKEN)
             if test_case.test_case.result == TestResult.FAIL:
                 failing_tests.append(test_case.test_case)
                 click.echo(" 🚨")

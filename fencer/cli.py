@@ -72,6 +72,14 @@ def run(oas_file, base_url):
   -------------------------"""
     click.echo(injection_message)
     test_runner.run_BFLA_attacks()
+  #Mass assignment
+    injection_message = """
+  -------------------------
+        Mass assignment
+  -------------------------"""
+    click.echo(injection_message)
+    test_runner.run_mass_assignment_attacks()
+    
 
     click.echo()
     

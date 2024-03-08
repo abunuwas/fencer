@@ -114,8 +114,8 @@ class TestRunner:
         pass
 
     def run_mass_assignment_attacks(self):
-        test_runner = TestMAEndpoints(api_spec=self.api_spec)
-        test_runner.test_MA_endpoints()
+        test_runner = MSTestRunner(api_spec=self.api_spec)
+        test_runner.run_mass_assignment_through_request_payloads()
 
     def run_insecure_design_attacks(self):
         pass
