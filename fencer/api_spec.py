@@ -61,7 +61,7 @@ def fake_parameter(schema):
         return random.randint(ranges.minimum, ranges.maximum)
     """
     if schema['type'] == 'integer':
-        return random.randint(1,100)
+        return random.randint(36,47)
 
     if schema['type'] == 'number':
         if 'format' not in schema:
@@ -132,7 +132,13 @@ class Endpoint:
         return [
             param for param in self.parameters if param['in'] == 'path'
         ]
-
+    
+    @property
+    def required_path_params(self):
+        return [
+            param for param in self.path_params if param['required'] 
+        ]
+    
     def has_query_params(self):
         return len(self.query_params) > 0
 
@@ -144,7 +150,10 @@ class Endpoint:
 
     def has_path_params(self):
         return len(self.path_params) > 0
-
+    
+    def has_required_path_params(self):
+        return len(self.required_path_params) > 0
+    
     @property
     def safe_url_path_without_query_params(self):
         return self.base_url + self.path.build_safe_path()
