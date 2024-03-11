@@ -9,7 +9,7 @@ from .BFLA import TestBFLA
 from .authorized_endpoints import TestAuthEndpoints
 from .sql_injection import SQLInjectionTestRunner
 from .test_case import AttackStrategy, TestCase, VulnerabilitySeverityLevel, TestReporter
-from .mass_assignment import TestMAEndpoints
+from .mass_assignment import MSTestRunner
 from .xss_injection import XSSInjectionTestRunner
 
 class TestRunner:
