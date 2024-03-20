@@ -115,7 +115,10 @@ class TestRunner:
 
     def run_mass_assignment_attacks(self):
         test_runner = MSTestRunner(api_spec=self.api_spec)
-        test_runner.run_mass_assignment_through_request_payloads()
+        failing_tests = test_runner.run_mass_assignment_through_request_payloads()
+        failed_tests_file = Path('.fencer/Mass_Assignment.json')
+        with failed_tests_file.open('w', encoding='utf-8') as file:
+            json.dump(failing_tests, file, ensure_ascii=False, indent=4)
 
     def run_insecure_design_attacks(self):
         pass

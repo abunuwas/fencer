@@ -15,6 +15,7 @@ class MSTestRunner:
         self.api_spec = api_spec
         self.endpoint_groups = {}
     def run_mass_assignment_through_request_payloads(self):
+        failing_tests = {}
         endpoint_body = {}
         output_field = set()
         input_field = set()
@@ -46,7 +47,8 @@ class MSTestRunner:
                         result.add(response)
                 if result:
                     click.echo(f"    Fields that may generate mass assignment of read-only attributes in this API endpoint:{result}", nl=True)
-
+                    failing_tests.update({endpoint.path.path:list(result)})
+        return failing_tests
 
 class TestMAEndpoints:
     def __init__(self, api_spec: APISpec):
