@@ -118,13 +118,13 @@ class Endpoint:
     @property
     def required_query_params(self):
         return [
-            param for param in self.query_params if param['required']
+            param for param in self.query_params if param.get('required',False)
         ]
 
     @property
     def optional_query_params(self):
         return [
-            param for param in self.parameters if not param['required']
+            param for param in self.parameters if not param.get('required',False)
         ]
 
     @property
@@ -136,7 +136,7 @@ class Endpoint:
     @property
     def required_path_params(self):
         return [
-            param for param in self.path_params if param['required'] 
+            param for param in self.path_params if param.get('required',False) 
         ]
     
     def has_query_params(self):
