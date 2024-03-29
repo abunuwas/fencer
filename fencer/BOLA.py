@@ -138,17 +138,21 @@ class TestBOLA:
         self.paths = api_spec.paths
 
     def has_require(self,parameter):
+        if type(parameter) == str:
+            return False
         if not parameter or parameter.get('require') == 'false':
             return False
         return True
     
     def is_identifier(self,parameter): # If parameter is_identifier then return True else return False
+        if type(parameter) == str:
+            return False
         if parameter.get('in') == 'path' and parameter.get('require',True):
             return True
         return False
         
     def check_authorization(self,operation_dict):
-        if len(operation_dict.get('security')) > 0:
+        if len(operation_dict.get('security',{})) > 0:
             return True
         return False
     
@@ -166,7 +170,7 @@ class TestBOLA:
         parameter_level_properties = {
             'is_identifier':self.is_identifier(item),
             'Location':parameter_location,
-            'type':item['schema']['type'],
+            'type':item.get('schema').get('type',[]),
             'format':item.get('schema').get('format',[])
         }
         item['Parameter_level_properties'] = parameter_level_properties
