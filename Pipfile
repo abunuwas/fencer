@@ -11,6 +11,7 @@ click = "*"
 tabulate = "*"
 pyyaml = "*"
 exrex = "*"
+json-ref-dict = "*"
 
 [dev-packages]
 black = "*"
