@@ -108,25 +108,25 @@ class Endpoint:
     @property
     def query_params(self):
         return [
-            param for param in self.parameters if param['in'] == 'query'
+            param for param in self.parameters if param.get('in') == 'query'
         ]
 
     @property
     def required_query_params(self):
         return [
-            param for param in self.query_params if param['required']
+            param for param in self.query_params if param.get('required')
         ]
 
     @property
     def optional_query_params(self):
         return [
-            param for param in self.parameters if not param['required']
+            param for param in self.parameters if not param.get('required')
         ]
 
     @property
     def path_params(self):
         return [
-            param for param in self.parameters if param['in'] == 'path'
+            param for param in self.parameters if param.get('in') == 'path'
         ]
 
     def has_query_params(self):
