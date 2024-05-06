@@ -9,7 +9,7 @@ from jsf import JSF
 from .api_spec import Endpoint, fake_parameter, APISpec
 from .test_case import TestResult, TestCase, AttackStrategy, TestDescription, HTTPMethods, VulnerabilitySeverityLevel
 
-AUTHORIZED_TOKEN = "eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJ0d2x5ODgxMzlAZ21haWwuY29tIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3MDgzMjMzMjQsImV4cCI6MTcwODkyODEyNH0.bi_zkpwXzxQXFRzruMm7DsTJ5bTZ0m2UHm4xGKMRYDqUgKS4y_4iWzQ6J-kiF713z7VQ0OeQ6aEet2jhgGXsUGpL3E5jfEw_gKC9UN1b71xivebZusVroZtp1_rgBUv70FmJjkm1sXPehc3RrpApijeQ99DeaNsobXnG9ABhzjj3-c7k9pto16Ymzjq4YbjvAv4NYwzwdQnN2GaJW_zTC82UfWB-8PoS1zO7RKo6oEGO9NiSGdKEEwmQYGLeVgpg2Fvz2rOImK-ZlnhNLD0v--uUSGEocmIx7HIGTETR4PBiErtUO-8tjZCSQx2g4gmduKmY4aCgSv7jnzk5oeGB5g"
+AUTHORIZED_TOKEN = "eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJ0d2x5ODgxMzlAZ21haWwuY29tLnR3Iiwicm9sZSI6InVzZXIiLCJpYXQiOjE3MTQ5Njk3NTAsImV4cCI6MTcxNTU3NDU1MH0.cIEX7o4oZ-vGGOpuTwnGpo-CHfv2xlOFF4k1-erdn49wAZX9GLkSpaGVFwDRdw5hnpJJuvvgXwsoQx7Cwd8a43vB4M-jGcseG-TCwI-Bzrb5hMz_LAQ_2zFE-uaLF-pcY-ehBXFEEqn3-q0bTDOgCsijxvRhFCb63Jh7FZo6J1nCd5a1iKtXbj4DmK5v1VhYNBivQxD67wuNXjdE-QU9IMo1oTPUG45mNmVmiPJQx7cFqcuTB9OaC787WpCLO7O4ceOJjfOQbf1Tj6zbwatJ-ylx5jKTzHOg-3MUbnvpGZgx32VYcvgx9yoJ8TUG7jpjZsLuMypXm8oiQ1auuvW_5g"
 
 xss_injection_strategies = [
     "<h1 style=\"color: red;\">xss attack</h1>",
@@ -163,7 +163,7 @@ class InjectionTestCaseRunner:
     def run(self,token):
         try:
             headers = {'Authorization': f'Bearer {token}'}
-            headers = {"Authorization": f"Bearer eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJ0d2x5ODgxMzlAZ21haWwuY29tIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3MDgzMjMzMjQsImV4cCI6MTcwODkyODEyNH0.bi_zkpwXzxQXFRzruMm7DsTJ5bTZ0m2UHm4xGKMRYDqUgKS4y_4iWzQ6J-kiF713z7VQ0OeQ6aEet2jhgGXsUGpL3E5jfEw_gKC9UN1b71xivebZusVroZtp1_rgBUv70FmJjkm1sXPehc3RrpApijeQ99DeaNsobXnG9ABhzjj3-c7k9pto16Ymzjq4YbjvAv4NYwzwdQnN2GaJW_zTC82UfWB-8PoS1zO7RKo6oEGO9NiSGdKEEwmQYGLeVgpg2Fvz2rOImK-ZlnhNLD0v--uUSGEocmIx7HIGTETR4PBiErtUO-8tjZCSQx2g4gmduKmY4aCgSv7jnzk5oeGB5g"}
+            headers = {"Authorization": f"Bearer eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJ0d2x5ODgxMzlAZ21haWwuY29tLnR3Iiwicm9sZSI6InVzZXIiLCJpYXQiOjE3MTQ5Njk3NTAsImV4cCI6MTcxNTU3NDU1MH0.cIEX7o4oZ-vGGOpuTwnGpo-CHfv2xlOFF4k1-erdn49wAZX9GLkSpaGVFwDRdw5hnpJJuvvgXwsoQx7Cwd8a43vB4M-jGcseG-TCwI-Bzrb5hMz_LAQ_2zFE-uaLF-pcY-ehBXFEEqn3-q0bTDOgCsijxvRhFCb63Jh7FZo6J1nCd5a1iKtXbj4DmK5v1VhYNBivQxD67wuNXjdE-QU9IMo1oTPUG45mNmVmiPJQx7cFqcuTB9OaC787WpCLO7O4ceOJjfOQbf1Tj6zbwatJ-ylx5jKTzHOg-3MUbnvpGZgx32VYcvgx9yoJ8TUG7jpjZsLuMypXm8oiQ1auuvW_5g"}
             callable_ = getattr(requests, self.test_case.description.http_method.value.lower())
             self.response = callable_(
                 self.test_case.description.url, json=self.test_case.description.payload, headers=headers
@@ -210,16 +210,9 @@ class InjectionTestCaseRunner:
         #click.echo(str1) 
         
         for substr in xss_injection_strategies:
-            if str1.find(substr) != -1 and  200 <=self.response.status_code <300:  
+            if str1.find(substr) != -1 :  
                 self.test_case.result = TestResult.FAIL
                 self.test_case.severity = VulnerabilitySeverityLevel.HIGH
-                break
-            elif self.response.status_code >= 500:
-                self.test_case.result = TestResult.FAIL
-                self.test_case.severity = VulnerabilitySeverityLevel.HIGH
-            elif str1.find(substr) != -1:
-                self.test_case.result = TestResult.FAIL
-                self.test_case.severity = VulnerabilitySeverityLevel.LOW
                 break
             else:
                 self.test_case.result = TestResult.SUCCESS
