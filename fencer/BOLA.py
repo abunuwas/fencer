@@ -136,6 +136,7 @@ class TestBOLA:
     def __init__(self, api_spec: APISpec):
         self.api_spec = api_spec
         self.paths = api_spec.paths
+        self.auth_tests = 0
 
     def has_require(self,parameter):
         if type(parameter) == str:
@@ -319,7 +320,8 @@ class TestBOLA:
                             parameter_data = parameters['Parameter_level_properties']
                             if endpoint_data and parameter_data and method_data:
                                 attack_pattern = self.check_condition(attack_vector_pattern,endpoint_data,parameter_data,method_data,location_num)
-                                All_endpoint_attack_pattern.update({path:attack_pattern}) 
+                                All_endpoint_attack_pattern.update({path:attack_pattern})
+                                print({path:attack_pattern},"🚨")
                             else:
                                 print('Not contain endpoint_data or parameter_data or method_data')
                     else:
@@ -342,6 +344,7 @@ class TestBOLA:
                     if endpoint_data and parameter_data and method_data:
                         attack_pattern = self.check_condition(attack_vector_pattern,endpoint_data,parameter_data,method_data,location_num)
                         All_endpoint_attack_pattern.update({path:attack_pattern})
+                        print({path:attack_pattern}," 🚨 ") 
                     else:
                         print('Not contain endpoint_data or parameter_data or method_data')
                 else:
