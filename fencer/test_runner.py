@@ -76,6 +76,12 @@ class TestRunner:
     def run_BOLA_attacks(self):
         test_runner = TestBOLA(api_spec=self.api_spec)
         failing_tests = test_runner.attack_analyzer()
+        self.reports.append(TestReporter(
+            category=AttackStrategy.BOLA,
+            number_tests=len(failing_tests),
+            failing_tests=len(failing_tests),
+            high_severity=sum(1 for test in failing_tests),
+        ))
         failed_tests_file = Path('.fencer/Broken_Object_Level_Authorization_attacks.json')
         with failed_tests_file.open('w', encoding='utf-8') as file:
             json.dump(failing_tests, file, ensure_ascii=False, indent=4)
