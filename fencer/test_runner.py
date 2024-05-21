@@ -119,6 +119,14 @@ class TestRunner:
         failed_tests_file = Path('.fencer/Mass_Assignment.json')
         with failed_tests_file.open('w', encoding='utf-8') as file:
             json.dump(failing_tests, file, ensure_ascii=False, indent=4)
+        self.reports.append(TestReporter(
+            category=AttackStrategy.MASS_ASSIGNMENT,
+            number_tests=test_runner.MS_tests,
+            failing_tests=len(failing_tests),
+            low_severity=0,
+            medium_severity=0,
+            high_severity=sum(1 for test in failing_tests)
+        ))
 
     def run_insecure_design_attacks(self):
         pass
