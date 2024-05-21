@@ -163,7 +163,6 @@ class InjectionTestCaseRunner:
     def run(self,token):
         try:
             headers = {'Authorization': f'Bearer {token}'}
-            headers = {"Authorization": f"Bearer eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJ0d2x5ODgxMzlAZ21haWwuY29tLnR3Iiwicm9sZSI6InVzZXIiLCJpYXQiOjE3MTQ5Njk3NTAsImV4cCI6MTcxNTU3NDU1MH0.cIEX7o4oZ-vGGOpuTwnGpo-CHfv2xlOFF4k1-erdn49wAZX9GLkSpaGVFwDRdw5hnpJJuvvgXwsoQx7Cwd8a43vB4M-jGcseG-TCwI-Bzrb5hMz_LAQ_2zFE-uaLF-pcY-ehBXFEEqn3-q0bTDOgCsijxvRhFCb63Jh7FZo6J1nCd5a1iKtXbj4DmK5v1VhYNBivQxD67wuNXjdE-QU9IMo1oTPUG45mNmVmiPJQx7cFqcuTB9OaC787WpCLO7O4ceOJjfOQbf1Tj6zbwatJ-ylx5jKTzHOg-3MUbnvpGZgx32VYcvgx9yoJ8TUG7jpjZsLuMypXm8oiQ1auuvW_5g"}
             callable_ = getattr(requests, self.test_case.description.http_method.value.lower())
             self.response = callable_(
                 self.test_case.description.url, json=self.test_case.description.payload, headers=headers
