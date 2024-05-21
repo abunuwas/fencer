@@ -19,6 +19,16 @@ test_case_example = {
     }
 }
 
+class Solutions(Enum):
+    SQL_INJECTION = "https://portswigger.net/web-security/sql-injection"
+    UNAUTHORIZED_ACCESS = "https://cheatsheetseries.owasp.org/cheatsheets/Authorization_Cheat_Sheet.html"
+    BOLA = "BOLA"
+    BFLA = "BFLA"
+    XSS_INJECTION = "https://portswigger.net/web-security/cross-site-scripting"
+    MASS_ASSIGNMENT = "https://cheatsheetseries.owasp.org/cheatsheets/Mass_Assignment_Cheat_Sheet.html"
+    @classmethod
+    def sol_arr(cls):
+        return [cls.SQL_INJECTION, cls.XSS_INJECTION, cls.UNAUTHORIZED_ACCESS, cls.BOLA, cls.BFLA, cls.MASS_ASSIGNMENT]
 
 class AttackStrategy(Enum):
     SQL_INJECTION = "sql_injection"
