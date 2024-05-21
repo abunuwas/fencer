@@ -8,7 +8,7 @@ from tabulate import tabulate
 from .test_runner import TestRunner
 from . import __version__
 from .api_spec import APISpec
-
+from .test_case import Solutions
 
 @click.group()
 @click.version_option(__version__)
@@ -92,6 +92,13 @@ def run(oas_file, base_url):
         "Number of tests": [report.number_tests for report in test_runner.reports],
         "Failing tests": [report.failing_tests for report in test_runner.reports]
     }, tablefmt="fancy_grid", headers=["Test category", "Number of tests", "Failing tests"]))
+
+    click.echo()
+    click.echo(click.style("> Vulnerability solutions", fg="blue"))
+    click.echo(tabulate({
+        "Test category": [report.category.value for report in test_runner.reports],
+        "Solution": [s.value for s in Solutions.sol_arr()]
+    }, tablefmt="fancy_grid", headers=["Test category", "Solution"]))
 
     click.echo()
     click.echo(click.style("> Vulnerabilities found by severity", fg="red"))
