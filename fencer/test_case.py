@@ -22,8 +22,8 @@ test_case_example = {
 class Solutions(Enum):
     SQL_INJECTION = "https://portswigger.net/web-security/sql-injection"
     UNAUTHORIZED_ACCESS = "https://cheatsheetseries.owasp.org/cheatsheets/Authorization_Cheat_Sheet.html"
-    BOLA = "BOLA"
-    BFLA = "BFLA"
+    BOLA = "https://owasp.org/API-Security/editions/2019/en/0xa1-broken-object-level-authorization/#how-to-prevent"
+    BFLA = "https://owasp.org/API-Security/editions/2019/en/0xa5-broken-function-level-authorization/#how-to-prevent"
     XSS_INJECTION = "https://portswigger.net/web-security/cross-site-scripting"
     MASS_ASSIGNMENT = "https://cheatsheetseries.owasp.org/cheatsheets/Mass_Assignment_Cheat_Sheet.html"
     @classmethod
