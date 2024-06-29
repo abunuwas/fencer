@@ -8,7 +8,7 @@ from tabulate import tabulate
 from .test_runner import TestRunner
 from . import __version__
 from .api_spec import APISpec
-
+from .test_case import Solutions
 
 @click.group()
 @click.version_option(__version__)
@@ -37,23 +37,52 @@ def run(oas_file, base_url):
     Path('.fencer').mkdir(exist_ok=True)
 
     test_runner = TestRunner(api_spec=api_spec)
-
+  #SQl injection
     injection_message = """
   -------------------------
   Testing injection attacks
   -------------------------"""
     click.echo(injection_message)
     test_runner.run_sql_injection_attacks()
-
+  #XSS injection
+    injection_message = """
+  -------------------------
+    Testing XSS injection
+  -------------------------"""
+    click.echo(injection_message)
+    test_runner.run_xss_injection_attacks()
+  #Unauthorized access
     injection_message = """
   -------------------------
   Testing unauthorized access
   -------------------------"""
     click.echo(injection_message)
     test_runner.run_unauthorized_access_attacks()
+  #BOLA attacks
+    injection_message = """
+  -------------------------
+        Testing BOLA
+  -------------------------"""
+    click.echo(injection_message)
+    test_runner.run_BOLA_attacks()
+  #BFLA attacks
+    injection_message = """
+  -------------------------
+        Testing BFLA
+  -------------------------"""
+    click.echo(injection_message)
+    test_runner.run_BFLA_attacks()
+  #Mass assignment
+    injection_message = """
+  -------------------------
+        Mass assignment
+  -------------------------"""
+    click.echo(injection_message)
+    test_runner.run_mass_assignment_attacks()
+    
 
     click.echo()
-
+    
     click.echo(click.style("  SUMMARY", fg="green"))
 
     click.echo()
@@ -65,6 +94,13 @@ def run(oas_file, base_url):
     }, tablefmt="fancy_grid", headers=["Test category", "Number of tests", "Failing tests"]))
 
     click.echo()
+    click.echo(click.style("> Vulnerability solutions", fg="blue"))
+    click.echo(tabulate({
+        "Test category": [report.category.value for report in test_runner.reports],
+        "Solution": [s.value for s in Solutions.sol_arr()]
+    }, tablefmt="fancy_grid", headers=["Test category", "Solution"]))
+
+    click.echo()
     click.echo(click.style("> Vulnerabilities found by severity", fg="red"))
     click.echo(tabulate({
         "Test category": [report.category.value for report in test_runner.reports],
@@ -72,6 +108,8 @@ def run(oas_file, base_url):
         "Medium": [report.medium_severity for report in test_runner.reports],
         "High": [report.high_severity for report in test_runner.reports],
     }, tablefmt="fancy_grid", headers=["Test category", "Low", "Medium", "High"]))
+
+
 
 
 if __name__ == "__main__":

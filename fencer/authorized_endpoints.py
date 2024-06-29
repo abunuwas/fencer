@@ -12,12 +12,15 @@ class UnauthorizedAccessTestCaseRunner:
         self.response = None
 
     def run(self):
-        callable_ = getattr(requests, self.test_case.description.http_method.value.lower())
-        self.response = callable_(
-            self.test_case.description.url, json=self.test_case.description.payload
-        )
-        self.resolve_test_result()
-
+        try:
+            callable_ = getattr(requests, self.test_case.description.http_method.value.lower())
+            self.response = callable_(
+                self.test_case.description.url, json=self.test_case.description.payload
+            )
+            self.resolve_test_result()
+        except requests.exceptions.ConnectionError:
+            self.response = None
+            self.resolve_test_result()
     def resolve_test_result(self):
         # If the server fails to respond, endpoint is protected and there's no possibility for exploit,
         # but we can break the server, so we give it a medium severity
@@ -25,11 +28,11 @@ class UnauthorizedAccessTestCaseRunner:
             self.test_case.result = TestResult.FAIL
             self.test_case.severity = VulnerabilitySeverityLevel.MEDIUM
             # If response status code is 401 or 403, it's all good
-        if self.response.status_code in [401, 403]:
+        elif self.response.status_code in [401, 403]:
             self.test_case.result = TestResult.SUCCESS
             self.test_case.severity = VulnerabilitySeverityLevel.ZERO
         # If the response status code is in the 2xx status code group, it's pretty bad
-        elif self.response.status_code >= 200 < 300:
+        elif 200 <= self.response.status_code < 300:
             self.test_case.result = TestResult.FAIL
             self.test_case.severity = VulnerabilitySeverityLevel.HIGH
         # In all other cases, the response isn't successful, but it's still

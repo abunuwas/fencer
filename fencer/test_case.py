@@ -19,19 +19,33 @@ test_case_example = {
     }
 }
 
+class Solutions(Enum):
+    SQL_INJECTION = "https://portswigger.net/web-security/sql-injection"
+    UNAUTHORIZED_ACCESS = "https://cheatsheetseries.owasp.org/cheatsheets/Authorization_Cheat_Sheet.html"
+    BOLA = "https://owasp.org/API-Security/editions/2019/en/0xa1-broken-object-level-authorization/#how-to-prevent"
+    BFLA = "https://owasp.org/API-Security/editions/2019/en/0xa5-broken-function-level-authorization/#how-to-prevent"
+    XSS_INJECTION = "https://portswigger.net/web-security/cross-site-scripting"
+    MASS_ASSIGNMENT = "https://cheatsheetseries.owasp.org/cheatsheets/Mass_Assignment_Cheat_Sheet.html"
+    @classmethod
+    def sol_arr(cls):
+        return [cls.SQL_INJECTION, cls.XSS_INJECTION, cls.UNAUTHORIZED_ACCESS, cls.BOLA, cls.BFLA, cls.MASS_ASSIGNMENT]
 
 class AttackStrategy(Enum):
-    INJECTION = "injection"
+    SQL_INJECTION = "sql_injection"
     UNAUTHORIZED_ACCESS = "unauthorized_access"
     SURFACE_ATTACKS = "surface_attacks"
     MASS_ASSIGNMENT = "mass_assignment"
     INSECURE_DESIGN = "insecure_design"
+    XSS_INJECTION = "xss_injection"
+    BOLA = "BOLA"
+    BFLA = "BFLA"
 
 
 class TestResult(Enum):
     SUCCESS = "success"
     FAIL = "fail"
     UNDETERMINED = "undetermined"
+    ERROR = "error"
 
 
 class VulnerabilitySeverityLevel(Enum):

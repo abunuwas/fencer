@@ -55,10 +55,14 @@ def fake_parameter(schema):
             return 'test@example.com'
         if schema['format'] == 'ipv4':
             return '127.0.0.1'
-
+    """
     if schema['type'] == 'integer':
         ranges = NumberRanges(schema)
         return random.randint(ranges.minimum, ranges.maximum)
+    """
+    if schema['type'] == 'integer':
+        return random.randint(36,47)
+
     if schema['type'] == 'number':
         if 'format' not in schema:
             ranges = NumberRanges(schema)
@@ -114,13 +118,13 @@ class Endpoint:
     @property
     def required_query_params(self):
         return [
-            param for param in self.query_params if param['required']
+            param for param in self.query_params if param.get('required',False)
         ]
 
     @property
     def optional_query_params(self):
         return [
-            param for param in self.parameters if not param['required']
+            param for param in self.parameters if not param.get('required',False)
         ]
 
     @property
@@ -128,7 +132,13 @@ class Endpoint:
         return [
             param for param in self.parameters if param['in'] == 'path'
         ]
-
+    
+    @property
+    def required_path_params(self):
+        return [
+            param for param in self.path_params if param.get('required',False) 
+        ]
+    
     def has_query_params(self):
         return len(self.query_params) > 0
 
@@ -140,7 +150,10 @@ class Endpoint:
 
     def has_path_params(self):
         return len(self.path_params) > 0
-
+    
+    def has_required_path_params(self):
+        return len(self.required_path_params) > 0
+    
     @property
     def safe_url_path_without_query_params(self):
         return self.base_url + self.path.build_safe_path()
