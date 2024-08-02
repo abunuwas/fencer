@@ -56,7 +56,7 @@ $ pip install -U fencer
 After installation, you can run fencer directly from the command line. The basic test suite runs like this:
 
 ```bash
-$ fencer --oas-file <path_to_openapi_spec> --base-url <base_url>
+$ fencer run --oas-file <path_to_openapi_spec> --base-url <base_url>
 ```
 
 Replace `<path_to_openapi_spec>` with the path to the OpenAPI specification for your API in your local machine.
