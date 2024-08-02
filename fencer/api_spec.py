@@ -8,6 +8,8 @@ from typing import Union, Optional, List
 
 import exrex
 from jsf import JSF
+from json_ref_dict import materialize, RefDict
+
 
 standard_http_methods = ['get', 'post', 'put', 'patch', 'delete', 'options', 'head']
 
@@ -108,25 +110,25 @@ class Endpoint:
     @property
     def query_params(self):
         return [
-            param for param in self.parameters if param['in'] == 'query'
+            param for param in self.parameters if param.get('in') == 'query'
         ]
 
     @property
     def required_query_params(self):
         return [
-            param for param in self.query_params if param['required']
+            param for param in self.query_params if param.get('required')
         ]
 
     @property
     def optional_query_params(self):
         return [
-            param for param in self.parameters if not param['required']
+            param for param in self.parameters if not param.get('required')
         ]
 
     @property
     def path_params(self):
         return [
-            param for param in self.parameters if param['in'] == 'path'
+            param for param in self.parameters if param.get('in') == 'path'
         ]
 
     def has_query_params(self):
@@ -310,30 +312,33 @@ class APISpec:
         return schema1
 
     def resolve_schema(self, schema_ref):
-        schema_name = schema_ref.split('/')[-1]
-        schema = self.spec['components']['schemas'][schema_name]
+        if 'http' not in schema_ref:
+            schema_name = schema_ref.split('/')[-1]
+            schema = self.spec['components']['schemas'][schema_name]
 
-        if 'allOf' in schema:
-            for nested_schema in schema['allOf']:
-                if '$ref' in nested_schema:
-                    resolved_schema = self.resolve_schema(nested_schema['$ref'])
-                    schema = self._merge_schemas(schema, resolved_schema)
-                else:
-                    schema = self._merge_schemas(schema, nested_schema)
+            if 'allOf' in schema:
+                for nested_schema in schema['allOf']:
+                    if '$ref' in nested_schema:
+                        resolved_schema = self.resolve_schema(nested_schema['$ref'])
+                        schema = self._merge_schemas(schema, resolved_schema)
+                    else:
+                        schema = self._merge_schemas(schema, nested_schema)
 
-        if 'anyOf' in schema:
-            for index, nested_schema in enumerate(schema['anyOf']):
-                if '$ref' in nested_schema:
-                    schema['anyOf'][index] = self.resolve_schema(nested_schema['$ref'])
+            if 'anyOf' in schema:
+                for index, nested_schema in enumerate(schema['anyOf']):
+                    if '$ref' in nested_schema:
+                        schema['anyOf'][index] = self.resolve_schema(nested_schema['$ref'])
 
-        for name, description in schema['properties'].items():
-            if '$ref' in description:
-                property_schema = self.resolve_schema(description['$ref'])
-                schema['properties'][name] = property_schema
-                continue
+            for name, description in schema['properties'].items():
+                if '$ref' in description:
+                    property_schema = self.resolve_schema(description['$ref'])
+                    schema['properties'][name] = property_schema
+                    continue
 
-            if description['type'] == 'array' and '$ref' in description['items']:
-                items_schema = self.resolve_schema(description['items']['$ref'])
-                description['items'] = items_schema
+                if description['type'] == 'array' and '$ref' in description['items']:
+                    items_schema = self.resolve_schema(description['items']['$ref'])
+                    description['items'] = items_schema
+        else:
+            schema = materialize(RefDict(schema_ref))
 
         return schema
